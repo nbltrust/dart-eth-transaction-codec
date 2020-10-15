@@ -1,0 +1,13 @@
+[
+    {
+        "address": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+        "symbol": "USDTERC20",
+        "type": "ERC20",
+        "params": { "decimal": 18 }
+    },
+    {
+        "address": "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
+        "symbol": "UNISWAP",
+        "type": "UNISWAP"
+    }
+]

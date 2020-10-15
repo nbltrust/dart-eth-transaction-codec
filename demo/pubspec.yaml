@@ -1,0 +1,7 @@
+name: ethereum_codec_demo
+version: 0.1.0
+publish_to: 'none'
+
+dependencies:
+  ethereum_codec:
+    path: ../
