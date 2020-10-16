@@ -11,7 +11,7 @@ class ContractConfig {
   final Map<String, dynamic> params;
 
   ContractConfig.fromJson(Map<String, dynamic> json):
-    address = json['address'],
+    address = (json['address'] as String).toLowerCase(),
     symbol = json['symbol'],
     type = json['type'],
     params = json['params'];
@@ -24,8 +24,12 @@ class AddressConfig {
   AddressConfig(this.configs, this.abis);
 
   ContractConfig getContractConfigByAddress(String address) {
+    var addr = address.toLowerCase();
+    if(!addr.startsWith('0x')) {
+      addr = '0x' + addr;
+    }
     return configs.firstWhere(
-      (element) => element.address == address,
+      (element) => element.address == addr,
       orElse: () => null);
   }
 

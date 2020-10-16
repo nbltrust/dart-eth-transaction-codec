@@ -17,6 +17,9 @@ class EthereumAddressHash {
   EthereumAddressHash(this.data) {
     if (data.length != size) throw FormatException();
   }
+  EthereumAddressHash.fromHex(String hexStr):
+    data = hex.decode(hexStr);
+
   String toJson() => '0x' + hex.encode(data);
   String toString() => toJson();
 }
