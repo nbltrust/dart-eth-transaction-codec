@@ -23,6 +23,15 @@ class AddressConfig {
 
   AddressConfig(this.configs, this.abis);
 
+  AddressConfig.fromJson(Map<String, dynamic> json) {
+    abis = new Map();
+    json['abis'].forEach((abi) {
+      abis[abi['type']] = ContractABI.fromJson(abi['abi']);
+    });
+    configs = List<ContractConfig>
+      .from((json['contracts'] as List).map((i) => ContractConfig.fromJson(i)));
+  }
+
   ContractConfig getContractConfigByAddress(String address) {
     var addr = address.toLowerCase();
     if(!addr.startsWith('0x')) {
@@ -34,10 +43,14 @@ class AddressConfig {
   }
 
   ContractABI getContractABIByType(String type) => abis[type];
-
+  
   static AddressConfig get instance => _getInstance();
   static AddressConfig _getInstance() => _instance;
   static AddressConfig _instance;
+  static void createInstanceFromJson(Map<String, dynamic> json) {
+    _instance = AddressConfig.fromJson(json);
+  }
+
   static void createInstance(String configDir) {
     var config_fn = './${configDir}/contract_symbols.json';
     File f = new File(config_fn);
@@ -91,6 +104,10 @@ class AddressConfig {
 /// https://etherscan.io/address/$CONTRACT_ADDRESS#code
 void initContractABIs(String configDir) {
   AddressConfig.createInstance(configDir);
+}
+
+void initContractABIsFromJson(Map<String, dynamic> abi_cfg) {
+  AddressConfig.createInstanceFromJson(abi_cfg);
 }
 
 /// Returns the [ContractConfig] for required contract address

@@ -3,8 +3,13 @@ import 'dart:convert';
 import 'package:ethereum_codec/ethereum_codec.dart';
 import 'package:convert/convert.dart';
 
+import 'contract_abi_to_json.dart';
+
 void main() {
-  initContractABIs('contract_abi');
+  //initContractABIs('contract_abi');
+  var abi_json = contractAbiToJson('contract_abi');
+  initContractABIsFromJson(abi_json);
+
   String tx_hex = 'f8ab82058f8513ac97ad0082db8594dac17f958d2ee523a2206206994597c13d831ec780b844a9059cbb000000000000000000000000f7fe3eee8c6d97d9f5029e62255b66c8ad17024e0000000000000000000000000000000000000000000000000000000011e1a30025a01250065c4925402220997f2c9dd6da93d6378797d86ed7271ac8976a11633b79a02397a95761c0a301fdf296bfb59e380c82157541ec07e59b5a388c4730fb7904';
 
   EthereumTransaction tx = EthereumTransaction.fromRlp(hex.decode(tx_hex));
