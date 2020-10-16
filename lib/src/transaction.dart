@@ -135,6 +135,7 @@ class EthereumTransaction {
     return {
       'name': contractCfg.symbol,
       'type': contractCfg.type,
+      'contract_params': contractCfg.params,
       'method': call_info.functionName,
       'params': call_info.callParams
     };

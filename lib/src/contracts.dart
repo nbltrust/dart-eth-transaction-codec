@@ -8,11 +8,13 @@ class ContractConfig {
   final String address;
   final String symbol;
   final String type;
+  final Map<String, dynamic> params;
 
   ContractConfig.fromJson(Map<String, dynamic> json):
     address = json['address'],
     symbol = json['symbol'],
-    type = json['type'];
+    type = json['type'],
+    params = json['params'];
 }
 
 class AddressConfig {
