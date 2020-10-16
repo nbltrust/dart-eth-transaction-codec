@@ -2,6 +2,9 @@ import 'dart:typed_data';
 import 'package:convert/convert.dart';
 import 'package:pointycastle/digests/sha3.dart';
 
+/// convert address to checksum address
+/// 
+/// https://github.com/ethereum/EIPs/blob/master/EIPS/eip-55.md
 String toChecksumAddress(String hexAddress)
 {
     if(hexAddress.startsWith('0x'))
@@ -17,5 +20,5 @@ String toChecksumAddress(String hexAddress)
         checksumAddr += hexAddress[i];
       }
     }
-    return checksumAddr;
+    return '0x' + checksumAddr;
 }
