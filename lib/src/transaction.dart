@@ -3,10 +3,10 @@ library ethereum_codec.transaction;
 import 'dart:typed_data';
 import 'package:convert/convert.dart';
 import 'package:eth_abi_codec/eth_abi_codec.dart';
-import 'package:pointycastle/src/utils.dart';
+import 'package:pointycastle/src/utils.dart' as pointy;
 import 'package:pointycastle/digests/sha3.dart';
 import 'package:ethereum_util/src/rlp.dart' as eth_rlp;
-
+import './checksum_address.dart' as cks_addr;
 import './contracts.dart';
 
 class EthereumAddressHash {
@@ -22,6 +22,8 @@ class EthereumAddressHash {
 
   String toJson() => '0x' + hex.encode(data);
   String toString() => toJson();
+  String toChecksumAddress() =>
+    cks_addr.toChecksumAddress(toJson());
 }
 
 class EthereumTransactionId {
@@ -67,14 +69,14 @@ class EthereumTransaction {
   factory EthereumTransaction.fromRlp(Uint8List rlp) {
     List<dynamic> t = eth_rlp.decode(rlp);
     if (t.length != 9) throw FormatException('Invalid length ${t.length}');
-    int sigV = decodeBigInt(t[6]).toInt();
+    int sigV = pointy.decodeBigInt(t[6]).toInt();
     return EthereumTransaction(
         null,
         EthereumAddressHash(t[3]),
-        decodeBigInt(t[4]),
-        decodeBigInt(t[2]).toInt(),
-        decodeBigInt(t[1]).toInt(),
-        decodeBigInt(t[0]).toInt(),
+        pointy.decodeBigInt(t[4]),
+        pointy.decodeBigInt(t[2]).toInt(),
+        pointy.decodeBigInt(t[1]).toInt(),
+        pointy.decodeBigInt(t[0]).toInt(),
         input: t[5],
         sigV: sigV,
         sigR: t[7],
