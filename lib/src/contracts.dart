@@ -131,13 +131,12 @@ String getContractCallPayload(ContractABI abi, String method, Map<String, dynami
   return hex.encode(call.toBinary(abi));
 }
 
-Future<Map<String, dynamic>> callContract(
+Future<Map<String, dynamic>> callContractByAbi(
+  ContractABI abi,
   String address,
   String method,
-  Map<String, dynamic> params, 
+  Map<String, dynamic> params,
   Future<String> rpcCall(Map<String, dynamic> payload)) async {
-  var cfg = getContractConfigByAddress(address);
-  var abi = getContractABIByType(cfg.type);
   var payload = getContractCallPayload(abi, method, params);
   var result = await rpcCall({
     'to': address,
@@ -147,4 +146,14 @@ Future<Map<String, dynamic>> callContract(
     result = result.substring(2);
 
   return abi.decomposeResult(method, hex.decode(result));
+}
+
+Future<Map<String, dynamic>> callContract(
+  String address,
+  String method,
+  Map<String, dynamic> params, 
+  Future<String> rpcCall(Map<String, dynamic> payload)) async {
+  var cfg = getContractConfigByAddress(address);
+  var abi = getContractABIByType(cfg.type);
+  return callContractByAbi(abi, address, method, params, rpcCall);
 }
