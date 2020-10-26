@@ -1,7 +1,9 @@
 library ethereum_codec.contracts;
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:convert/convert.dart';
 import 'package:eth_abi_codec/eth_abi_codec.dart';
 
 class ContractConfig {
@@ -119,4 +121,28 @@ ContractConfig getContractConfigByAddress(String address) {
 
 ContractABI getContractABIByType(String type) {
   return AddressConfig.instance.getContractABIByType(type);
+}
+
+String getContractCallPayload(ContractABI abi, String method, Map<String, dynamic> params) {
+  var call = ContractCall(method);
+  params.forEach((key, value) {call.setCallParam(key, value);});
+  return hex.encode(call.toBinary(abi));
+}
+
+Future<Map<String, dynamic>> callContract(
+  String address,
+  String method,
+  Map<String, dynamic> params, 
+  Future<String> rpcCall(Map<String, dynamic> payload)) async {
+  var cfg = getContractConfigByAddress(address);
+  var abi = getContractABIByType(cfg.type);
+  var payload = getContractCallPayload(abi, method, params);
+  var result = await rpcCall({
+    'to': address,
+    'data': '0x' + payload
+  });
+  if(result.startsWith('0x'))
+    result = result.substring(2);
+
+  return abi.decomposeResult(method, hex.decode(result));
 }
