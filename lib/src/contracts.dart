@@ -17,6 +17,8 @@ class ContractConfig {
     symbol = json['symbol'],
     type = json['type'],
     params = json['params'];
+
+  ContractConfig(this.address, this.symbol, this.type, this.params);
 }
 
 class AddressConfig {

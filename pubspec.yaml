@@ -1,5 +1,5 @@
 name: ethereum_codec
-version: 0.1.1
+version: 0.1.2
 
 dependencies:
   convert: ^2.1.1
