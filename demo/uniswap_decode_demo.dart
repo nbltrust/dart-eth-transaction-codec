@@ -29,10 +29,7 @@ void main() {
     print('contract name: ${contract['name']}');
     print('contract type: ${contract['type']}');
     print('contract method: ${contract['method']}');
-    print('contract params: ${contract['contract_params']}');
-    contract['params'].forEach((p) {
-        print('param ${p.paramName} = ${p.paramValue}');
-    });
+    print(contract['params']);
   }
 
   print('tx hash to sign: ${tx.hashToSign()}');
