@@ -19,7 +19,7 @@ Future<String> callInfura(Map<String, dynamic> param) async {
 
 void main() async {
   initContractABIs('contract_abi');
-  print(await callContract('0xdac17f958d2ee523a2206206994597c13d831ec7', 'name', {}, callInfura));
+  print(await callContract('0xcd62b1c403fa761baadfc74c525ce2b51780b184', 'name', {}, callInfura));
   print(await callContract('0xdac17f958d2ee523a2206206994597c13d831ec7', 'balances', {'': 'dac17f958d2ee523a2206206994597c13d831ec7'}, callInfura));
   print(await callContract('0xdac17f958d2ee523a2206206994597c13d831ec7', 'decimals', {}, callInfura));
   print(await callContract('0xdac17f958d2ee523a2206206994597c13d831ec7', '_totalSupply', {}, callInfura));

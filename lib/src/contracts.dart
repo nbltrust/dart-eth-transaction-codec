@@ -151,7 +151,7 @@ Future<Map<String, dynamic>> callContractByAbi(
 Future<Map<String, dynamic>> callContract(
   String address,
   String method,
-  Map<String, dynamic> params, 
+  Map<String, dynamic> params,
   Future<String> rpcCall(Map<String, dynamic> payload)) async {
   var cfg = getContractConfigByAddress(address);
   var abi = getContractABIByType(cfg.type);

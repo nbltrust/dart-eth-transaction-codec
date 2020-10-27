@@ -84,23 +84,23 @@ class EthereumTransaction {
         chainId: sigV);
   }
 
-  // Uint8List toRlp({bool withSignature = true}) {
-  //   return ((sigV != chainId * 2 + 35) &&
-  //           (sigV != chainId * 2 + 36) &&
-  //           withSignature == false)
-  //       ? eth_rlp.encode(<dynamic>[nonce, gasPrice, gas, to.data, value, input])
-  //       : eth_rlp.encode(<dynamic>[
-  //           nonce,
-  //           gasPrice,
-  //           gas,
-  //           to.data,
-  //           value,
-  //           input,
-  //           withSignature ? sigV : chainId,
-  //           withSignature ? sigR : Uint8List(0),
-  //           withSignature ? sigS : Uint8List(0)
-  //         ]);
-  // }
+  Uint8List toRlp({bool withSignature = true}) {
+    return ((sigV != chainId * 2 + 35) &&
+            (sigV != chainId * 2 + 36) &&
+            withSignature == false)
+        ? eth_rlp.encode(<dynamic>[nonce, gasPrice, gas, to.data, value, input])
+        : eth_rlp.encode(<dynamic>[
+            nonce,
+            gasPrice,
+            gas,
+            to.data,
+            value,
+            input,
+            withSignature ? sigV : chainId,
+            withSignature ? sigR : Uint8List(0),
+            withSignature ? sigS : Uint8List(0)
+          ]);
+  }
 
   Uint8List hashToSign() {
     return SHA3Digest(256, true).process(
