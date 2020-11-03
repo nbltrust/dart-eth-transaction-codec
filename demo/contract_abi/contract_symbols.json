@@ -9,5 +9,10 @@
         "address": "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
         "symbol": "UNISWAP",
         "type": "UNISWAP"
+    },
+    {
+        "address": "0xa5407eae9ba41422680e2e00537571bcc53efbfd",
+        "symbol": "CURVEFI",
+        "type": "CURVEFI"
     }
 ]

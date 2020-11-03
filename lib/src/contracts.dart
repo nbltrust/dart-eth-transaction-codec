@@ -131,17 +131,15 @@ String getContractCallPayload(ContractABI abi, String method, Map<String, dynami
   return hex.encode(call.toBinary(abi));
 }
 
+typedef Future<String> ethRpcCall(String to, String data);
 Future<Map<String, dynamic>> callContractByAbi(
   ContractABI abi,
   String address,
   String method,
   Map<String, dynamic> params,
-  Future<String> rpcCall(Map<String, dynamic> payload)) async {
+  ethRpcCall call) async {
   var payload = getContractCallPayload(abi, method, params);
-  var result = await rpcCall({
-    'to': address,
-    'data': '0x' + payload
-  });
+  var result = await call(address, '0x' + payload);
   if(result.startsWith('0x'))
     result = result.substring(2);
 
@@ -152,8 +150,11 @@ Future<Map<String, dynamic>> callContract(
   String address,
   String method,
   Map<String, dynamic> params,
-  Future<String> rpcCall(Map<String, dynamic> payload)) async {
+  ethRpcCall call) async {
   var cfg = getContractConfigByAddress(address);
+  if(cfg == null) {
+    throw Exception("Unconfigured contract address ${address}");
+  }
   var abi = getContractABIByType(cfg.type);
-  return callContractByAbi(abi, address, method, params, rpcCall);
+  return callContractByAbi(abi, address, method, params, call);
 }
