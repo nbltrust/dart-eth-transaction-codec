@@ -22,3 +22,10 @@ String toChecksumAddress(String hexAddress)
     }
     return '0x' + checksumAddr;
 }
+
+String publicKeyToChecksumAddress(String hexX, String hexY) {
+  var plainKey = hex.decode(hexX) + hex.decode(hexY);
+  var digest = SHA3Digest(256, true).process(Uint8List.fromList(plainKey));
+  var hexDigest = hex.encode(digest);
+  return toChecksumAddress(hexDigest.substring(hexDigest.length - 40));
+}
