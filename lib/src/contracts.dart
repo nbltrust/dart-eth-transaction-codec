@@ -143,6 +143,10 @@ Future<Map<String, dynamic>> callContractByAbi(
   if(result.startsWith('0x'))
     result = result.substring(2);
 
+  if(result == '') {// no such method
+    return null;
+  }
+
   return abi.decomposeResult(method, hex.decode(result));
 }
 
