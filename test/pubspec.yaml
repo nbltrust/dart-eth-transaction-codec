@@ -1,0 +1,9 @@
+name: ethereum_codec_test
+version: 0.1.0
+publish_to: 'none'
+
+dependencies:
+  ethereum_codec:
+    path: ../
+  dio: ^3.0.10
+  test: any

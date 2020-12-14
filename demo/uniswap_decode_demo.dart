@@ -1,10 +1,10 @@
-import 'dart:convert';
-
 import 'package:ethereum_codec/ethereum_codec.dart';
 import 'package:convert/convert.dart';
 
+import 'initialize.dart';
+
 void main() {
-  initContractABIs('contract_abi');
+  initAbi();
 
   // EthereumTransaction tx = EthereumTransaction(
   //   EthereumAddressHash.fromHex('621B2B1e5e1364fB014C5232E2bC9d30dd46c1f0'),

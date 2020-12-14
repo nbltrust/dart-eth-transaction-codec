@@ -1,13 +1,17 @@
 library ethereum_codec.transaction;
 
+import 'dart:async';
 import 'dart:typed_data';
 import 'package:convert/convert.dart';
 import 'package:eth_abi_codec/eth_abi_codec.dart';
+import 'package:ethereum_codec/src/translator.dart';
 import 'package:pointycastle/src/utils.dart' as pointy;
 import 'package:pointycastle/digests/sha3.dart';
 import 'package:ethereum_util/src/rlp.dart' as eth_rlp;
 import './checksum_address.dart' as cks_addr;
 import './contracts.dart';
+import 'util/strip0x.dart';
+import 'util/my_hexdecode.dart';
 
 class EthereumAddressHash {
   final Uint8List data;
@@ -18,7 +22,7 @@ class EthereumAddressHash {
     if (data.length != size) throw FormatException();
   }
   EthereumAddressHash.fromHex(String hexStr):
-    data = hex.decode(hexStr);
+    data = my_hexdecode(hexStr);
 
   String toJson() => '0x' + hex.encode(data);
   String toString() => toJson();
@@ -64,6 +68,24 @@ class EthereumTransaction {
   EthereumTransaction(
       this.from, this.to, this.value, this.gas, this.gasPrice, this.nonce,
       {this.input, this.sigR, this.sigS, this.sigV, this.chainId = 1});
+
+  factory EthereumTransaction.fromJson(Map<String, dynamic> json) {
+    int sigV = int.parse(strip0x(json['v'] ?? '0x00'), radix: 16);
+    int chainId = (sigV - 35) ~/ 2;
+    return EthereumTransaction(
+      EthereumAddressHash.fromHex(strip0x(json['from'])),
+      EthereumAddressHash.fromHex(strip0x(json['to'])),
+      BigInt.parse(strip0x(json['value']), radix: 16),
+      int.parse(strip0x(json['gas']), radix: 16),
+      int.parse(strip0x(json['gasPrice']), radix: 16),
+      int.parse(strip0x(json['nonce']), radix: 16),
+      input: my_hexdecode(strip0x(json['input'])),
+      sigR: my_hexdecode(strip0x(json['r'] ?? '0x')),
+      sigS: my_hexdecode(strip0x(json['s'] ?? '0x')),
+      sigV: sigV,
+      chainId: chainId
+    );
+  }
 
   /// Unmarshals a RLP-encoded Uint8List to [EthereumTransaction].
   factory EthereumTransaction.fromRlp(Uint8List rlp) {
@@ -144,5 +166,9 @@ class EthereumTransaction {
       'method': call_info.functionName,
       'params': call_info.callParams
     };
+  }
+
+  Future<String> getDescription() async {
+    return await Translator.translate(this);
   }
 }

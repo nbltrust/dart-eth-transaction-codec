@@ -1,11 +1,12 @@
 library ethereum_codec.contracts;
 
 import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
 import 'package:convert/convert.dart';
 import 'package:eth_abi_codec/eth_abi_codec.dart';
+
+import 'translator.dart';
+import 'util/strip0x.dart';
 
 class ContractConfig {
   final String address;
@@ -38,10 +39,7 @@ class AddressConfig {
   }
 
   ContractConfig getContractConfigByAddress(String address) {
-    var addr = address.toLowerCase();
-    if(!addr.startsWith('0x')) {
-      addr = '0x' + addr;
-    }
+    var addr = append0x(address.toLowerCase());
     return configs.firstWhere(
       (element) => element.address == addr,
       orElse: () => null);
@@ -62,42 +60,26 @@ class AddressConfig {
     _instance = AddressConfig.fromJson(json);
   }
 
-  static void createInstance(String configDir) {
-    var config_fn = './${configDir}/contract_symbols.json';
-    File f = new File(config_fn);
-    if(!f.existsSync()) {
-      throw "can not find ${config_fn}";
-    }
-    String config_str = f.readAsStringSync();
-    var configs = List<ContractConfig>.from(jsonDecode(config_str).map((i) => ContractConfig.fromJson(i)));
-    Map<String, ContractABI> abis = new Map();
+  static void createInstance(List<dynamic> contractSymbols, List<Map<String, dynamic>> abis) {
+    var configs = List<ContractConfig>.from(contractSymbols.map((i) => ContractConfig.fromJson(i)));
+    var abiMap = Map<String, ContractABI>.fromEntries(
+                  abis.map(
+                    (i) => MapEntry(
+                      i['type'], 
+                      ContractABI.fromJson(i['abi']))));
+
     configs.forEach((element) {
-      if(abis.containsKey(element.address)) {
-        throw "duplicated address entry in contract_symbols.json";
+      if(!abiMap.containsKey(element.type)) {
+        throw Exception("abi ${element.type} not configured");
       }
-      var abi_fn = './${configDir}/abi/${element.type}.json';
-      File abi_file = new File(abi_fn);
-      if(!abi_file.existsSync()) {
-        throw "abi file ${abi_fn} not found";
-      }
-      var abi_str = abi_file.readAsStringSync();
-      abis[element.type] = ContractABI.fromJson(jsonDecode(abi_str));
     });
-    _instance = AddressConfig(configs, abis);
+    _instance = AddressConfig(configs, abiMap);
   }
 }
 
-/// Init contract abi from configurations in configDir
+/// Init contract abi from configurations
 /// 
-/// * configDir file structure
-/// ```bash
-/// ./contract_symbols.json
-/// ./abi/ERC20.json  
-/// ./abi/UNISWAP.json  
-/// ...
-/// ```
-/// 
-/// * contract_symbols.json format
+/// * contract_symbols format
 /// ```json
 /// [
 ///   {
@@ -108,13 +90,57 @@ class AddressConfig {
 /// ]
 /// ```
 /// 
-/// * ./abi/$CONTRACT_TYPE.json   
-/// 
+/// * abis format
+/// ```json
+/// [
+///   {
+///     "type": "ERC20",
+///     "abi": [
+///       {
+///         "constant": true,
+///         "inputs": [],
+///         "name": "name",
+///         "outputs": [
+///            {
+///                "name": "",
+///                "type": "string"
+///            }
+///        ],
+///        "payable": false,
+///        "stateMutability": "view",
+///        "type": "function"
+///       }
+///     ]
+///   }
+/// ]
+/// ```
 /// Each type in contract_symbols.json need to have corresponding json file in abi
 /// the abi json file can be found in
 /// https://etherscan.io/address/$CONTRACT_ADDRESS#code
-void initContractABIs(String configDir) {
-  AddressConfig.createInstance(configDir);
+///
+/// * translators format
+/// if translators is null, transaction can not be translated into description
+/// [
+///   {
+///        "id": "UNISWAP_swapTokensForExactTokens",
+///        "desc_en": "swap %s %s for %s %s to %s",
+///        "translators": [
+///            "ARG-amountInMax ARG-path IMMED-0 LSTITEM DECIMAL FMTAMT",
+///            "ARG-path IMMED-0 LSTITEM SYMBOL",
+///            "ARG-amountOut ARG-path IMMED--1 LSTITEM DECIMAL FMTAMT",
+///            "ARG-path IMMED--1 LSTITEM SYMBOL",
+///            "ARG-to FMTADDR"
+///        ]
+///    }
+/// ]
+void initContractABIs(List<dynamic> contractSymbols, List<Map<String, dynamic>> abis, 
+  {
+    List<dynamic> translators = null
+  }) {
+  AddressConfig.createInstance(contractSymbols, abis);
+  if(translators != null) {
+    Translator.createInstance(translators);
+  }
 }
 
 void initContractABIsFromJson(Map<String, dynamic> abi_cfg) {
@@ -143,105 +169,4 @@ Uint8List getContractCallPayload(ContractABI abi, String method, Map<String, dyn
   var call = ContractCall(method);
   params.forEach((key, value) {call.setCallParam(key, value);});
   return call.toBinary(abi);
-}
-
-typedef Future<String> ethRpcCall(String to, String data);
-Future<Map<String, dynamic>> callContractByAbi(
-  ContractABI abi,
-  String address,
-  String method,
-  Map<String, dynamic> params,
-  ethRpcCall call) async {
-  var payload = hex.encode(getContractCallPayload(abi, method, params));
-  var result = await call(address, '0x' + payload);
-  if(result.startsWith('0x'))
-    result = result.substring(2);
-
-  if(result == '') {// no such method
-    return null;
-  }
-
-  return abi.decomposeResult(method, hex.decode(result));
-}
-
-Future<Map<String, dynamic>> callContract(
-  String address,
-  String method,
-  Map<String, dynamic> params,
-  ethRpcCall call) async {
-  var cfg = getContractConfigByAddress(address);
-  if(cfg == null) {
-    throw Exception("Unconfigured contract address ${address}");
-  }
-  var abi = getContractABIByType(cfg.type);
-  return callContractByAbi(abi, address, method, params, call);
-}
-
-/// Calls aggregate function of multicall contract, return a list of data
-/// 
-/// Pass a list of request
-/// request format:
-/// 1. for configured contract: [contract address, method, params]
-/// 2. for unconfigured contract: [abi type, contract address, method, params]
-/// 
-/// Return a list of results
-Future<List<Map<String, dynamic>>> aggregateCallContract(
-  List<List<dynamic>> args,
-  ethRpcCall call) async {
-  var multicallCfg = getContractConfigBySymbol('MULTICALL');
-  if(multicallCfg == null) {
-    throw Exception('MULTICALL contract not configured, can not use aggregate call');
-  }
-
-  var multicallABI = getContractABIByType(multicallCfg.type);
-  List<List<dynamic>> callArgs = [];
-  List<ContractABI> callAbis = [];
-  List<String> callMethods = [];
-
-  args.forEach((call) {
-    if(call.length != 3 && call.length != 4) {
-      throw Exception("Invalid call format");
-    }
-
-    String contractType, method, address;
-    Map<String, dynamic> params;
-    if(call.length == 3) {
-      var cfg = getContractConfigByAddress(call[0]);
-      if(cfg == null) {
-        throw Exception("Unconfigured contract address ${call[0]}");
-      }
-      contractType = cfg.type;
-      address = call[0];
-      method = call[1];
-      params = call[2];
-    } else {
-      contractType = call[0];
-      address = call[1];
-      method = call[2];
-      params = call[3];
-    }
-
-    if(address.startsWith('0x'))
-      address = address.substring(2);
-    var callAbi = getContractABIByType(contractType);
-    var callPayload = getContractCallPayload(callAbi, method, params);
-    callArgs.add([
-      address,
-      callPayload
-    ]);
-    callAbis.add(callAbi);
-    callMethods.add(method);
-  });
-
-  var r = await callContractByAbi(multicallABI, multicallCfg.address, 'aggregate', {'calls': callArgs}, call);
-  var returnData = r['returnData'] as List;
-  if(returnData.length != callAbis.length) {
-    throw Exception("Unmatched call and return data");
-  }
-
-  List<Map<String, dynamic>> results = [];
-  for(var i = 0; i < callAbis.length; i++) {
-    results.add(callAbis[i].decomposeResult(callMethods[i], Uint8List.fromList(returnData[i] as List<int>)));
-  }
-  return results;
 }
