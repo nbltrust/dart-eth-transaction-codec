@@ -64,6 +64,27 @@ class CallTrans {
         continue;
       }
 
+      if(op.startsWith('CMP')) { // Pop two strings from stack and push back true if they are equal, else push back false
+        var s1 = stack.removeLast() as String;
+        var s2 = stack.removeLast() as String;
+        stackAdd(s1 == s2);
+        continue;
+      }
+
+      if(op.startsWith('OR')) { // Pop two boolean value from stack and push back logic-or result
+        var b1 = stack.removeLast() as bool;
+        var b2 = stack.removeLast() as bool;
+        stackAdd(b1 || b2);
+        continue;
+      }
+
+      if(op.startsWith('AND')) { // Pop two boolean value from stack and push back logic-and result
+        var b1 = stack.removeLast() as bool;
+        var b2 = stack.removeLast() as bool;
+        stackAdd(b1 && b2);
+        continue;
+      }
+
       if(op == 'LIST') { // Pop list length, and items one by one from stack, and push back list object
         var len = int.parse(stack.removeLast());
         List<String> obj = [];
@@ -115,10 +136,32 @@ class CallTrans {
         continue;
       }
 
+      if(op == 'SYMBOL_EXCEPT') { // Pops erc20 address from stack and push back symbol, if exception is raised, push back empty string
+        var addr = stack.removeLast() as String;
+        try {
+          var cfg = await ETHRpc.instance().getERC20Config(addr);
+          stackAdd(cfg[1].toString());
+        } on Exception {
+          stackAdd("");
+        }
+        continue;
+      }
+
       if(op == 'DECIMAL') { // Pops erc20 address from stack and push back decimal
         var addr = stack.removeLast() as String;
         var cfg = await ETHRpc.instance().getERC20Config(addr);
         stackAdd(cfg[2].toString());
+        continue;
+      }
+
+      if(op == 'DECIMAL_EXCEPT') { // Pops erc20 address from stack and push back decimal, if exception is raised, push back 0
+        var addr = stack.removeLast() as String;
+        try {
+          var cfg = await ETHRpc.instance().getERC20Config(addr);
+          stackAdd(cfg[2].toString());
+        } on Exception {
+          stackAdd("0");
+        }
         continue;
       }
 
@@ -193,31 +236,29 @@ class Translator {
   /// if unable to translate, return null
   static Future<String> translate(EthereumTransaction tx) async {
     if(!initialized) {
-      return Future(null);
+      return null;
     }
 
     try {
       if(tx.input.length != 0) {
         var cfg = getContractConfigByAddress(tx.to.toString());
         if(cfg == null)
-          return Future(null);
-
+          return null;
         var abi = getContractABIByType(cfg.type);
         if(abi == null)
-          return Future(null);
-      
+          return null;
         var callInfo = ContractCall.fromBinary(tx.input, abi);
         var methodId = '${cfg.type}_${callInfo.functionName}';
+        // print(methodId);
         if(!instance().transConfig.containsKey(methodId)) {
-          return Future(null);
+          return null;
         }
-
         return await instance().transConfig[methodId].translate(tx.value, tx.to.toString(), callInfo.callParams);
       } else {
         return await instance().transConfig['ETH_transfer'].translate(tx.value, tx.to.toString(), {});
       }
     } catch (e) {
     }
-    return Future(null);
+    return null;
   }
 }
