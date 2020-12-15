@@ -12,7 +12,7 @@ dependencies:
   eth_abi_codec:
     git:
      url: https://github.com/nbltrust/dart-eth-abi-codec
-     ref: main
+     ref: '0.2.0'
 
 environment:
   sdk: ">=1.19.0 <3.0.0"
