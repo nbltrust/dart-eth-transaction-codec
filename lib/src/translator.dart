@@ -9,6 +9,24 @@ import 'transaction.dart';
 import 'contracts.dart';
 import 'rpc.dart';
 
+/// get ERC20 configurations of given address
+/// 
+/// 
+/// return a list of [name, symbol, decimals] of ERC20
+/// if address is configured locally, will just fetch
+Future<List<dynamic>> _getERC20Config(String address) async {
+  var localConfig = getContractConfigByAddress(address);
+  if( localConfig != null && 
+      localConfig.type == 'ERC20' &&
+      localConfig.params != null &&
+      localConfig.params.containsKey('name') &&
+      localConfig.params.containsKey('decimal')) {
+    return [localConfig.params['name'], localConfig.symbol, localConfig.params['decimal']];
+  }
+
+  return (await ETHRpc.instance().getERC20Config(address)).sublist(0, 3);
+}
+
 class CallTrans {
   String desc_en;
   List<String> translators;
@@ -131,7 +149,7 @@ class CallTrans {
 
       if(op == 'SYMBOL') { // Pops erc20 address from stack and push back symbol
         var addr = stack.removeLast() as String;
-        var cfg = await ETHRpc.instance().getERC20Config(addr);
+        var cfg = await _getERC20Config(addr);
         stackAdd(cfg[1]);
         continue;
       }
@@ -139,7 +157,7 @@ class CallTrans {
       if(op == 'SYMBOL_EXCEPT') { // Pops erc20 address from stack and push back symbol, if exception is raised, push back empty string
         var addr = stack.removeLast() as String;
         try {
-          var cfg = await ETHRpc.instance().getERC20Config(addr);
+          var cfg = await _getERC20Config(addr);
           stackAdd(cfg[1].toString());
         } on Exception {
           stackAdd("");
@@ -149,7 +167,7 @@ class CallTrans {
 
       if(op == 'DECIMAL') { // Pops erc20 address from stack and push back decimal
         var addr = stack.removeLast() as String;
-        var cfg = await ETHRpc.instance().getERC20Config(addr);
+        var cfg = await _getERC20Config(addr);
         stackAdd(cfg[2].toString());
         continue;
       }
@@ -157,7 +175,7 @@ class CallTrans {
       if(op == 'DECIMAL_EXCEPT') { // Pops erc20 address from stack and push back decimal, if exception is raised, push back 0
         var addr = stack.removeLast() as String;
         try {
-          var cfg = await ETHRpc.instance().getERC20Config(addr);
+          var cfg = await _getERC20Config(addr);
           stackAdd(cfg[2].toString());
         } on Exception {
           stackAdd("0");
@@ -253,6 +271,7 @@ class Translator {
         if(!instance().transConfig.containsKey(methodId)) {
           return null;
         }
+        // print(callInfo.callParams);
         return await instance().transConfig[methodId].translate(tx.value, tx.to.toString(), callInfo.callParams);
       } else {
         return await instance().transConfig['ETH_transfer'].translate(tx.value, tx.to.toString(), {});

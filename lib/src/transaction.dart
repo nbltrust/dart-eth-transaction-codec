@@ -144,23 +144,23 @@ class EthereumTransaction {
   ///   ]
   /// }
   /// ```
-  /// if transaction does not contain a contract call, return null
-  /// if contract call target address can not be recognized, throw exception
+  /// if transaction does not contain a contract call, return {}
+  /// if contract call target address can not be recognized, return null
   Map<String, dynamic> getContractInfo() {
     var contractCfg = getContractConfigByAddress(to.toString());
 
     if(contractCfg == null) {
       if(input.length == 0) {
-        return null;
+        return {};
       } else {
-        throw "unknown contract call to address ${to.toString()}";
+        return null;
       }
     }
   
     var abi = getContractABIByType(contractCfg.type);
     var call_info = ContractCall.fromBinary(input, abi);
     return {
-      'name': contractCfg.symbol,
+      'symbol': contractCfg.symbol,
       'type': contractCfg.type,
       'contract_params': contractCfg.params,
       'method': call_info.functionName,

@@ -179,9 +179,9 @@ void main() async {
     '0x20bd60c840314c8a8383ba2acea81a8f79744f095d23626a4e77c6c82065a0ab',
     'pay 20000.00 USDC for at least 4098.81 SNX to 0xB4...7364');
 
-    runTrans('test 1inchv2 swap eth-erc20',
-    '0x49533c7905a950196b04d0da723a196fff039b76c9dd7e844d3a8126fdff5845',
-    'pay 2.3500 ETH for at least 0.947154 COVER to 0x79...9F97');
+  runTrans('test 1inchv2 swap eth-erc20',
+  '0x49533c7905a950196b04d0da723a196fff039b76c9dd7e844d3a8126fdff5845',
+  'pay 2.3500 ETH for at least 0.947154 COVER to 0x79...9F97');
 
   runTrans('test 1inchv2 swap eth-erc20',
     '0xbd8afa04d1a66182c4165df80088276eca3ced1b636d4e016911a7f5ab482ae4',
@@ -195,27 +195,35 @@ void main() async {
     '0x5a13878d8c23195402695df20af2e3e628b31f0ab13bdc5e1fabd999268080d0',
     'pay 10.00 KP3R for at least 4522.97 USDC to 0x54...D756');
 
-    runTrans('test 1inchv2 discountedSwap eth-erc20',
-      '0xd8fe813a1c9958071aad1b8c51bcacd575e63648629c3553b1d66e781c7d6058',
-      'pay 2.9000 ETH for at least 13888.60 YLD to 0x37...567f');
+  runTrans('test 1inchv2 discountedSwap eth-erc20',
+    '0xd8fe813a1c9958071aad1b8c51bcacd575e63648629c3553b1d66e781c7d6058',
+    'pay 2.9000 ETH for at least 13888.60 YLD to 0x37...567f');
 
-    runTrans('test 1inchv2 discountedSwap erc20-eth',
-      '0xce3fd7a54c38b5dba70a8f5d9d1a463d8ec5b738c65f6fcd17a73b760a31111c',
-      'pay 1427.38 KNC for at least 2.4873 ETH to 0x68...e6b5');
+  runTrans('test 1inchv2 discountedSwap erc20-eth',
+    '0xce3fd7a54c38b5dba70a8f5d9d1a463d8ec5b738c65f6fcd17a73b760a31111c',
+    'pay 1427.38 KNC for at least 2.4873 ETH to 0x68...e6b5');
 
-    runTrans('test 1inchv2 discountedSwap erc20-eth',
-      '0x45e57ae24c246c744dfcdbb8eedc2c1ef14d2a773ccc7853f41e8bdc5a3d0a33',
-      'pay 0.0243762 YFI for at least 0.477838 ETH to 0x68...e6b5');
+  runTrans('test 1inchv2 discountedSwap erc20-eth',
+    '0x45e57ae24c246c744dfcdbb8eedc2c1ef14d2a773ccc7853f41e8bdc5a3d0a33',
+    'pay 0.0243762 YFI for at least 0.477838 ETH to 0x68...e6b5');
 
-    runTrans('test balancer v2 multihopBatchSwapExactIn erc20-erc20',
-      '0x7709dc5107f22efc56cc16775efc9f57bebc7d9ce60c28a6712c88a0947268ae',
-      'pay 3812.30 DAI for at least 3529.69 COVER_HARVEST_2020_12_31_DAI_0_NOCLAIM');
-  
-    runTrans('test balancer v2 multihopBatchSwapExactIn erc20-eth',
-      '0x5cdc9966364e6a6243959cd52a245d8a7de479575a39747644f0ab5006e29daa',
-      'pay 20.00 UNI-V2 for at least 2.5921 ETH');
+  runTrans('test balancer v2 multihopBatchSwapExactIn erc20-erc20',
+    '0x7709dc5107f22efc56cc16775efc9f57bebc7d9ce60c28a6712c88a0947268ae',
+    'pay 3812.30 DAI for at least 3529.69 COVER_HARVEST_2020_12_31_DAI_0_NOCLAIM');
 
-    runTrans('test balancer v2 multihopBatchSwapExactIn eth-erc20',
-      '0xc8a27a008771ed4cf88578d9f0da515018e17bd5f385b974a96bef0c7aa84f06',
-      'pay 2.0000 ETH for at least 13.54 UNI-V2');
+  runTrans('test balancer v2 multihopBatchSwapExactIn erc20-eth',
+    '0x5cdc9966364e6a6243959cd52a245d8a7de479575a39747644f0ab5006e29daa',
+    'pay 20.00 UNI-V2 for at least 2.5921 ETH');
+
+  runTrans('test balancer v2 multihopBatchSwapExactIn eth-erc20',
+    '0xc8a27a008771ed4cf88578d9f0da515018e17bd5f385b974a96bef0c7aa84f06',
+    'pay 2.0000 ETH for at least 13.54 UNI-V2');
+
+  runTrans('test balancer v2 multihopBatchSwapExactOut eth-erc20',
+      '0x525b72619facf0aa8c0b57e10afe9cfd5d5aec09e10d68d078f5f7b8e95b03db',
+      'pay at most 0.936846 ETH for 493.00 YETI');
+
+  runTrans('test balancer v2 multihopBatchSwapExactOut erc20-eth',
+      '0xad53f73826010ce9997f1749d1e025531230b7c06a171d7873347814d2250bb6',
+      'pay at most 574.72 BAL for 12.02 ETH');
 }
