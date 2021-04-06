@@ -42,17 +42,25 @@ class ETHRpc {
   }
 
   /// Call eth rpc method eth_gasPrice
-  /// 
+  ///
   /// return current gasPrice in ETH
   Future<int> getGasPrice() async {
     var res = (await callback('eth_gasPrice', [])) as String;
     return int.parse(strip0x(res), radix: 16);
   }
 
-  Future<int> estimateGas(String address, BigInt value, String method, Map<String, dynamic> args, {String type = null}) async {
+  Future<int> estimateGas(String address, BigInt value, String method, Map<String, dynamic> args,
+      {String type = null}) async {
     var abi = _getContractABI(strip0x(address), type);
     var payload = hex.encode(getContractCallPayload(abi, method, args));
-    var result = (await callback('eth_estimateGas', [{"to": append0x(address), "value": "0x" + value.toRadixString(16), "data": "0x" + payload}, "latest"])) as String;
+    return estimateGasRaw(append0x(address), "0x" + value.toRadixString(16), "0x" + payload);
+  }
+
+  Future<int> estimateGasRaw(String to, String value, String data) async {
+    var result = (await callback('eth_estimateGas', [
+      {"to": to, "value": value, "data": data},
+      "latest"
+    ])) as String;
     return int.parse(strip0x(result), radix: 16);
   }
 

@@ -94,5 +94,16 @@ void main() async {
   print(await ETHRpc.instance().getGasPrice());
 
   print('estimate gas');
-  print(await ETHRpc.instance().estimateGas('0x5ba5fcf1d81d4ce036bba16b36ba71577aa6ef89', BigInt.zero, 'approve', {'_spender': 'df5e0e81dff6faf3a7e52ba697820c5e32d806a8', '_value': '0x123456789'}, type: 'ERC20'));
+  print(await ETHRpc.instance().estimateGas(
+      '0x5ba5fcf1d81d4ce036bba16b36ba71577aa6ef89',
+      BigInt.zero,
+      'approve',
+      {'_spender': 'df5e0e81dff6faf3a7e52ba697820c5e32d806a8', '_value': '0x123456789'},
+      type: 'ERC20'));
+
+  print('estimate gas raw');
+  print(await ETHRpc.instance().estimateGasRaw(
+      '0x9271d303b57c204636c38df0ed339b18bf98f909',
+      '0x8e1bc9bf040000',
+      '0xa4eba3830000000000000000000000000000000000000000000000008d8be6f53763a146000000000000000000000000000000000000000000000004c767dead6a855bb1000000000000000000000000f83310afadd9912cab1326c9710a919b8ff228f500000000000000000000000000000000000000000000000000000eb67310b3e0'));
 }
