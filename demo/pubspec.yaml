@@ -6,3 +6,6 @@ dependencies:
   ethereum_codec:
     path: ../
   dio: ^3.0.10
+
+environment:
+  sdk: ">=1.19.0 <3.0.0"

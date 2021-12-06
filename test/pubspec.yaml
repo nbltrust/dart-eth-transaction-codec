@@ -5,5 +5,10 @@ publish_to: 'none'
 dependencies:
   ethereum_codec:
     path: ../
+  decimal: ^0.3.0
   dio: ^3.0.10
   test: any
+  intl: ^0.16.0
+
+environment:
+  sdk: ">=1.19.0 <3.0.0"
