@@ -14,45 +14,58 @@ class ContractConfig {
   final String type;
   final Map<String, dynamic> params;
 
-  ContractConfig.fromJson(Map<String, dynamic> json):
-    address = (json['address'] as String).toLowerCase(),
-    symbol = json['symbol'],
-    type = json['type'],
-    params = json['params'];
+  ContractConfig.fromJson(Map<String, dynamic> json)
+      : address = (json['address'] as String).toLowerCase(),
+        symbol = json['symbol'],
+        type = json['type'],
+        params = json['params'];
 
   ContractConfig(this.address, this.symbol, this.type, this.params);
 }
 
 class AddressConfig {
-  List<ContractConfig> configs;
+  Map<String, List<ContractConfig>> configsMap;
   Map<String, ContractABI> abis; // maps from type to abi, e.g. 'ERC20' => abi
 
-  AddressConfig(this.configs, this.abis);
+  AddressConfig(List<ContractConfig> configs, Map<String, ContractABI> abis, [int chainId = 0]) {
+    configsMap = new Map<String, List<ContractConfig>>();
+    configsMap['chainId:$chainId'] = configs;
 
-  AddressConfig.fromJson(Map<String, dynamic> json) {
-    abis = new Map();
+    this.abis = abis;
+  }
+
+  AddressConfig.fromJson(Map<String, dynamic> json, [int chainId = 0]) {
+    abis = new Map<String, ContractABI>();
     json['abis'].forEach((abi) {
       abis[abi['type']] = ContractABI.fromJson(abi['abi']);
     });
-    configs = List<ContractConfig>
-      .from((json['contracts'] as List).map((i) => ContractConfig.fromJson(i)));
+
+    final configs = List<ContractConfig>.from((json['contracts'] as List).map((i) => ContractConfig.fromJson(i)));
+    configsMap = new Map<String, List<ContractConfig>>();
+    configsMap['chainId:$chainId'] = configs;
   }
 
-  ContractConfig getContractConfigByAddress(String address) {
+  void append(List<dynamic> configs, [int chainId = 0]) {
+    final old = configsMap['chainId:$chainId'];
+    if (old == null) {
+      configsMap['chainId:$chainId'] = List<ContractConfig>.from((configs).map((i) => ContractConfig.fromJson(i)));
+      return;
+    }
+
+    configsMap['chainId:$chainId'].addAll(List<ContractConfig>.from((configs).map((i) => ContractConfig.fromJson(i))));
+  }
+
+  ContractConfig getContractConfigByAddress(String address, [int chainId = 0]) {
     var addr = append0x(address.toLowerCase());
-    return configs.firstWhere(
-      (element) => element.address == addr,
-      orElse: () => null);
+    return configsMap['chainId:$chainId'].firstWhere((element) => element.address == addr, orElse: () => null);
   }
 
-  ContractConfig getContractConfigBySymbol(String symbol) {
-    return configs.firstWhere(
-      (element) => element.symbol == symbol,
-      orElse: () => null);
+  ContractConfig getContractConfigBySymbol(String symbol, [chainId = 0]) {
+    return configsMap['chainId:$chainId'].firstWhere((element) => element.symbol == symbol, orElse: () => null);
   }
 
   ContractABI getContractABIByType(String type) => abis[type];
-  
+
   static AddressConfig get instance => _getInstance();
   static AddressConfig _getInstance() => _instance;
   static AddressConfig _instance;
@@ -60,25 +73,24 @@ class AddressConfig {
     _instance = AddressConfig.fromJson(json);
   }
 
-  static void createInstance(List<dynamic> contractSymbols, List<Map<String, dynamic>> abis) {
-    var configs = List<ContractConfig>.from(contractSymbols.map((i) => ContractConfig.fromJson(i)));
-    var abiMap = Map<String, ContractABI>.fromEntries(
-                  abis.map(
-                    (i) => MapEntry(
-                      i['type'], 
-                      ContractABI.fromJson(i['abi']))));
+  static void createInstance(List<dynamic> contractSymbols, List<Map<String, dynamic>> abis, [int chainId = 0]) {
+    final configs = List<ContractConfig>.from(contractSymbols.map((i) => ContractConfig.fromJson(i)));
+
+    final abiMap =
+        Map<String, ContractABI>.fromEntries(abis.map((i) => MapEntry(i['type'], ContractABI.fromJson(i['abi']))));
 
     configs.forEach((element) {
-      if(!abiMap.containsKey(element.type)) {
+      if (!abiMap.containsKey(element.type)) {
         throw Exception("abi ${element.type} not configured");
       }
     });
-    _instance = AddressConfig(configs, abiMap);
+
+    _instance = AddressConfig(configs, abiMap, chainId);
   }
 }
 
 /// Init contract abi from configurations
-/// 
+///
 /// * contract_symbols format
 /// ```json
 /// [
@@ -89,7 +101,7 @@ class AddressConfig {
 ///   }
 /// ]
 /// ```
-/// 
+///
 /// * abis format
 /// ```json
 /// [
@@ -133,12 +145,11 @@ class AddressConfig {
 ///        ]
 ///    }
 /// ]
-void initContractABIs(List<dynamic> contractSymbols, List<Map<String, dynamic>> abis, 
-  {
-    List<dynamic> translators = null
-  }) {
+void initContractABIs(List<dynamic> contractSymbols, List<Map<String, dynamic>> abis,
+    {List<dynamic> translators = null, int chainId = 0}) {
   AddressConfig.createInstance(contractSymbols, abis);
-  if(translators != null) {
+
+  if (translators != null) {
     Translator.createInstance(translators);
   }
 }
@@ -148,14 +159,14 @@ void initContractABIsFromJson(Map<String, dynamic> abi_cfg) {
 }
 
 /// Returns the [ContractConfig] for required contract address
-/// 
+///
 /// If no matching contract found, return null
 ContractConfig getContractConfigByAddress(String address) {
   return AddressConfig.instance.getContractConfigByAddress(address);
 }
 
 /// Returns the [ContractConfig] for required contract symbol
-/// 
+///
 /// If no matching contract found, return null
 ContractConfig getContractConfigBySymbol(String symbol) {
   return AddressConfig.instance.getContractConfigBySymbol(symbol);
@@ -167,6 +178,8 @@ ContractABI getContractABIByType(String type) {
 
 Uint8List getContractCallPayload(ContractABI abi, String method, Map<String, dynamic> params) {
   var call = ContractCall(method);
-  params.forEach((key, value) {call.setCallParam(key, value);});
+  params.forEach((key, value) {
+    call.setCallParam(key, value);
+  });
   return call.toBinary(abi);
 }
