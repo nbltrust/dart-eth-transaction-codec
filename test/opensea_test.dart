@@ -76,6 +76,16 @@ Future<ParsedResult> parseCancelOrder(ContractCall callInfo, dynamic tx) async {
   return ParsedResult(recipient, []);
 }
 
+Future<ParsedResult> parseRegisterProxy(ContractCall callInfo, dynamic tx) async {
+  return ParsedResult(tx.from.toString(), []);
+}
+
+Future<ParsedResult> parseSafeTransferFrom(ContractCall callInfo, dynamic tx) async {
+  final recipient = '0x' + callInfo.callParams['to'].toString();
+
+  return ParsedResult(recipient, [recipient]);
+}
+
 void main() async {
   initAbi();
 
@@ -165,5 +175,48 @@ void main() async {
     final s = sprintf("Cancel listing", parsed.args);
     print(s);
     expect(s, "Cancel listing");
+  });
+
+  // 0xea61d8731a663ab1c731af263127963c8c462f7b530f075ed2e5f7e2e56f5f9e
+  test('test opensea registerProxy', () async {
+    EthereumTransaction tx = EthereumTransaction(
+        EthereumAddressHash.fromHex('c76ddaad7be40da759fb659272c6115f25c63a7d'),
+        EthereumAddressHash.fromHex('a5409ec958c83c3f309868babaca7c86dcb077c1'),
+        BigInt.parse('0', radix: 16),
+        int.parse('7e313', radix: 16),
+        int.parse('1697dbf3a5', radix: 16),
+        int.parse('0', radix: 16),
+        input: hex.decode("ddd81f82"));
+
+    final contract = tx.getContractInfo();
+    final callInfo = ContractCall.fromJson({'function': contract['method'], 'params': contract['params']});
+
+    final parsed = await parseRegisterProxy(callInfo, tx);
+
+    final s = sprintf("Mint NFT", parsed.args);
+    print(s);
+    expect(s, "Mint NFT");
+  });
+
+  // 0xbd286a34a717918c4fc0b13e346309f0033f26408afa9f3d577dee023c2d86f0
+  test('test opensea safeTransferFrom', () async {
+    EthereumTransaction tx = EthereumTransaction(
+        EthereumAddressHash.fromHex('47d2797f8e35ed3c8170f59e85cb5f196669af59'),
+        EthereumAddressHash.fromHex('495f947276749ce646f68ac8c248420045cb7b5e'),
+        BigInt.parse('0', radix: 16),
+        int.parse('1fdf2', radix: 16),
+        int.parse('1286ffd29e', radix: 16),
+        int.parse('0', radix: 16),
+        input: hex.decode(
+            "f242432a00000000000000000000000047d2797f8e35ed3c8170f59e85cb5f196669af59000000000000000000000000128f29dbf7b2b2bb218eb139f6a5804aa751154f47d2797f8e35ed3c8170f59e85cb5f196669af59000000000000300000000001000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"));
+
+    final contract = tx.getContractInfo();
+    final callInfo = ContractCall.fromJson({'function': contract['method'], 'params': contract['params']});
+
+    final parsed = await parseSafeTransferFrom(callInfo, tx);
+
+    final s = sprintf("Transfer 1 NFT to %s", parsed.args);
+    print(s);
+    expect(s, "Transfer 1 NFT to 0x128f29dbf7b2b2bb218eb139f6a5804aa751154f");
   });
 }
