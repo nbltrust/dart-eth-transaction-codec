@@ -56,8 +56,20 @@ class AddressConfig {
   }
 
   ContractConfig getContractConfigByAddress(String address, [int chainId = 0]) {
-    var addr = append0x(address.toLowerCase());
-    return configsMap['chainId:$chainId'].firstWhere((element) => element.address == addr, orElse: () => null);
+    var addr = address.toLowerCase();
+
+    if (!addr.startsWith('0x')) {
+      try {
+        hex.decode(addr);
+
+        addr = append0x(addr);
+      } catch (e) {
+        //
+      }
+    }
+
+    return configsMap['chainId:$chainId']
+        .firstWhere((element) => element.address.toLowerCase() == addr, orElse: () => null);
   }
 
   ContractConfig getContractConfigBySymbol(String symbol, [chainId = 0]) {
