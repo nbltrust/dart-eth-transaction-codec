@@ -69,8 +69,8 @@ class AddressConfig {
   static AddressConfig get instance => _getInstance();
   static AddressConfig _getInstance() => _instance;
   static AddressConfig _instance;
-  static void createInstanceFromJson(Map<String, dynamic> json) {
-    _instance = AddressConfig.fromJson(json);
+  static void createInstanceFromJson(Map<String, dynamic> json, [int chainId = 0]) {
+    _instance = AddressConfig.fromJson(json, chainId);
   }
 
   static void createInstance(List<dynamic> contractSymbols, List<Map<String, dynamic>> abis, [int chainId = 0]) {
@@ -147,7 +147,7 @@ class AddressConfig {
 /// ]
 void initContractABIs(List<dynamic> contractSymbols, List<Map<String, dynamic>> abis,
     {List<dynamic> translators = null, int chainId = 0}) {
-  AddressConfig.createInstance(contractSymbols, abis);
+  AddressConfig.createInstance(contractSymbols, abis, chainId);
 
   if (translators != null) {
     Translator.createInstance(translators);
@@ -161,15 +161,15 @@ void initContractABIsFromJson(Map<String, dynamic> abi_cfg) {
 /// Returns the [ContractConfig] for required contract address
 ///
 /// If no matching contract found, return null
-ContractConfig getContractConfigByAddress(String address) {
-  return AddressConfig.instance.getContractConfigByAddress(address);
+ContractConfig getContractConfigByAddress(String address, [int chainId = 0]) {
+  return AddressConfig.instance.getContractConfigByAddress(address, chainId);
 }
 
 /// Returns the [ContractConfig] for required contract symbol
 ///
 /// If no matching contract found, return null
-ContractConfig getContractConfigBySymbol(String symbol) {
-  return AddressConfig.instance.getContractConfigBySymbol(symbol);
+ContractConfig getContractConfigBySymbol(String symbol, [int chainId = 0]) {
+  return AddressConfig.instance.getContractConfigBySymbol(symbol, chainId);
 }
 
 ContractABI getContractABIByType(String type) {
