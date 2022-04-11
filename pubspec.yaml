@@ -1,5 +1,6 @@
 name: ethereum_codec
-version: 0.2.1
+version: 0.2.8
+publish_to: none
 
 dependencies:
   convert: ^2.1.1
@@ -8,7 +9,7 @@ dependencies:
   sprintf: ^5.0.0
   ethereum_util:
     git:
-      url: https://github.com/GreenAppers/ethereum_util
+      url: https://github.com/ethereumdart/ethereum_util
   eth_abi_codec:
     git:
      url: https://github.com/nbltrust/dart-eth-abi-codec
