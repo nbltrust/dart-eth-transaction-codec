@@ -27,14 +27,14 @@ class AddressConfig {
   Map<String, List<ContractConfig>> configsMap;
   Map<String, ContractABI> abis; // maps from type to abi, e.g. 'ERC20' => abi
 
-  AddressConfig(List<ContractConfig> configs, Map<String, ContractABI> abis, [int chainId = 0]) {
+  AddressConfig(List<ContractConfig> configs, Map<String, ContractABI> abis, [int chainId = 1]) {
     configsMap = new Map<String, List<ContractConfig>>();
     configsMap['chainId:$chainId'] = configs;
 
     this.abis = abis;
   }
 
-  AddressConfig.fromJson(Map<String, dynamic> json, [int chainId = 0]) {
+  AddressConfig.fromJson(Map<String, dynamic> json, [int chainId = 1]) {
     abis = new Map<String, ContractABI>();
     json['abis'].forEach((abi) {
       abis[abi['type']] = ContractABI.fromJson(abi['abi']);
@@ -45,7 +45,7 @@ class AddressConfig {
     configsMap['chainId:$chainId'] = configs;
   }
 
-  void append(List<dynamic> configs, [int chainId = 0]) {
+  void append(List<dynamic> configs, [int chainId = 1]) {
     final old = configsMap['chainId:$chainId'];
     if (old == null) {
       configsMap['chainId:$chainId'] = List<ContractConfig>.from((configs).map((i) => ContractConfig.fromJson(i)));
@@ -55,7 +55,7 @@ class AddressConfig {
     configsMap['chainId:$chainId'].addAll(List<ContractConfig>.from((configs).map((i) => ContractConfig.fromJson(i))));
   }
 
-  ContractConfig getContractConfigByAddress(String address, [int chainId = 0]) {
+  ContractConfig getContractConfigByAddress(String address, [int chainId = 1]) {
     var addr = address.toLowerCase();
 
     if (!addr.startsWith('0x')) {
@@ -72,7 +72,7 @@ class AddressConfig {
         .firstWhere((element) => element.address.toLowerCase() == addr, orElse: () => null);
   }
 
-  ContractConfig getContractConfigBySymbol(String symbol, [chainId = 0]) {
+  ContractConfig getContractConfigBySymbol(String symbol, [chainId = 1]) {
     return configsMap['chainId:$chainId'].firstWhere((element) => element.symbol == symbol, orElse: () => null);
   }
 
@@ -81,11 +81,11 @@ class AddressConfig {
   static AddressConfig get instance => _getInstance();
   static AddressConfig _getInstance() => _instance;
   static AddressConfig _instance;
-  static void createInstanceFromJson(Map<String, dynamic> json, [int chainId = 0]) {
+  static void createInstanceFromJson(Map<String, dynamic> json, [int chainId = 1]) {
     _instance = AddressConfig.fromJson(json, chainId);
   }
 
-  static void createInstance(List<dynamic> contractSymbols, List<Map<String, dynamic>> abis, [int chainId = 0]) {
+  static void createInstance(List<dynamic> contractSymbols, List<Map<String, dynamic>> abis, [int chainId = 1]) {
     final configs = List<ContractConfig>.from(contractSymbols.map((i) => ContractConfig.fromJson(i)));
 
     final abiMap =
@@ -158,7 +158,7 @@ class AddressConfig {
 ///    }
 /// ]
 void initContractABIs(List<dynamic> contractSymbols, List<Map<String, dynamic>> abis,
-    {List<dynamic> translators = null, int chainId = 0}) {
+    {List<dynamic> translators = null, int chainId = 1}) {
   AddressConfig.createInstance(contractSymbols, abis, chainId);
 
   if (translators != null) {
@@ -173,14 +173,14 @@ void initContractABIsFromJson(Map<String, dynamic> abi_cfg) {
 /// Returns the [ContractConfig] for required contract address
 ///
 /// If no matching contract found, return null
-ContractConfig getContractConfigByAddress(String address, [int chainId = 0]) {
+ContractConfig getContractConfigByAddress(String address, [int chainId = 1]) {
   return AddressConfig.instance.getContractConfigByAddress(address, chainId);
 }
 
 /// Returns the [ContractConfig] for required contract symbol
 ///
 /// If no matching contract found, return null
-ContractConfig getContractConfigBySymbol(String symbol, [int chainId = 0]) {
+ContractConfig getContractConfigBySymbol(String symbol, [int chainId = 1]) {
   return AddressConfig.instance.getContractConfigBySymbol(symbol, chainId);
 }
 
