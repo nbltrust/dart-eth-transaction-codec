@@ -1,5 +1,5 @@
 name: ethereum_codec
-version: 0.2.8
+version: 0.3.0
 publish_to: none
 
 dependencies:
