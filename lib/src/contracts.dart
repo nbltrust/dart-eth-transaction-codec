@@ -12,7 +12,7 @@ class ContractConfig {
   final String address;
   final String symbol;
   final String type;
-  final Map<String, dynamic> params;
+  final Map<String, dynamic>? params;
 
   ContractConfig.fromJson(Map<String, dynamic> json)
       : address = (json['address'] as String).toLowerCase(),
@@ -24,24 +24,20 @@ class ContractConfig {
 }
 
 class AddressConfig {
-  Map<String, List<ContractConfig>> configsMap;
-  Map<String, ContractABI> abis; // maps from type to abi, e.g. 'ERC20' => abi
+  Map<String, List<ContractConfig>> configsMap = {};
+  Map<String, ContractABI> abis = {}; // maps from type to abi, e.g. 'ERC20' => abi
 
   AddressConfig(List<ContractConfig> configs, Map<String, ContractABI> abis, [int chainId = 1]) {
-    configsMap = new Map<String, List<ContractConfig>>();
     configsMap['chainId:$chainId'] = configs;
-
     this.abis = abis;
   }
 
   AddressConfig.fromJson(Map<String, dynamic> json, [int chainId = 1]) {
-    abis = new Map<String, ContractABI>();
     json['abis'].forEach((abi) {
       abis[abi['type']] = ContractABI.fromJson(abi['abi']);
     });
 
     final configs = List<ContractConfig>.from((json['contracts'] as List).map((i) => ContractConfig.fromJson(i)));
-    configsMap = new Map<String, List<ContractConfig>>();
     configsMap['chainId:$chainId'] = configs;
   }
 
@@ -52,10 +48,10 @@ class AddressConfig {
       return;
     }
 
-    configsMap['chainId:$chainId'].addAll(List<ContractConfig>.from((configs).map((i) => ContractConfig.fromJson(i))));
+    configsMap['chainId:$chainId']?.addAll(List<ContractConfig>.from((configs).map((i) => ContractConfig.fromJson(i))));
   }
 
-  ContractConfig getContractConfigByAddress(String address, [int chainId = 1]) {
+  ContractConfig? getContractConfigByAddress(String address, [int chainId = 1]) {
     var addr = address.toLowerCase();
 
     if (!addr.startsWith('0x')) {
@@ -68,19 +64,18 @@ class AddressConfig {
       }
     }
 
-    return configsMap['chainId:$chainId']
-        .firstWhere((element) => element.address.toLowerCase() == addr, orElse: () => null);
+    return configsMap['chainId:$chainId']?.cast<ContractConfig?>().firstWhere((element) => element?.address.toLowerCase() == addr, orElse: () => null);
   }
 
-  ContractConfig getContractConfigBySymbol(String symbol, [chainId = 1]) {
-    return configsMap['chainId:$chainId'].firstWhere((element) => element.symbol == symbol, orElse: () => null);
+  ContractConfig? getContractConfigBySymbol(String symbol, [chainId = 1]) {
+    return configsMap['chainId:$chainId']?.cast<ContractConfig?>().firstWhere((element) => element?.symbol == symbol, orElse: () => null);
   }
 
-  ContractABI getContractABIByType(String type) => abis[type];
+  ContractABI? getContractABIByType(String type) => abis[type];
 
-  static AddressConfig get instance => _getInstance();
-  static AddressConfig _getInstance() => _instance;
-  static AddressConfig _instance;
+  static AddressConfig? get instance => _getInstance();
+  static AddressConfig? _getInstance() => _instance;
+  static AddressConfig? _instance;
   static void createInstanceFromJson(Map<String, dynamic> json, [int chainId = 1]) {
     _instance = AddressConfig.fromJson(json, chainId);
   }
@@ -158,7 +153,7 @@ class AddressConfig {
 ///    }
 /// ]
 void initContractABIs(List<dynamic> contractSymbols, List<Map<String, dynamic>> abis,
-    {List<dynamic> translators = null, int chainId = 1}) {
+    {List<dynamic>? translators , int chainId = 1}) {
   AddressConfig.createInstance(contractSymbols, abis, chainId);
 
   if (translators != null) {
@@ -173,22 +168,22 @@ void initContractABIsFromJson(Map<String, dynamic> abi_cfg) {
 /// Returns the [ContractConfig] for required contract address
 ///
 /// If no matching contract found, return null
-ContractConfig getContractConfigByAddress(String address, [int chainId = 1]) {
-  return AddressConfig.instance.getContractConfigByAddress(address, chainId);
+ContractConfig? getContractConfigByAddress(String address, [int chainId = 1]) {
+  return AddressConfig.instance?.getContractConfigByAddress(address, chainId);
 }
 
 /// Returns the [ContractConfig] for required contract symbol
 ///
 /// If no matching contract found, return null
-ContractConfig getContractConfigBySymbol(String symbol, [int chainId = 1]) {
-  return AddressConfig.instance.getContractConfigBySymbol(symbol, chainId);
+ContractConfig? getContractConfigBySymbol(String symbol, [int chainId = 1]) {
+  return AddressConfig.instance?.getContractConfigBySymbol(symbol, chainId);
 }
 
-ContractABI getContractABIByType(String type) {
-  return AddressConfig.instance.getContractABIByType(type);
+ContractABI? getContractABIByType(String type) {
+  return AddressConfig.instance?.getContractABIByType(type);
 }
 
-Uint8List getContractCallPayload(ContractABI abi, String method, Map<String, dynamic> params) {
+Uint8List? getContractCallPayload(ContractABI abi, String method, Map<String, dynamic> params) {
   var call = ContractCall(method);
   params.forEach((key, value) {
     call.setCallParam(key, value);

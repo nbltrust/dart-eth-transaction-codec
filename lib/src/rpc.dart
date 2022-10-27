@@ -15,24 +15,23 @@ import 'util/strip0x.dart';
 typedef Future<dynamic> ETHCallback(String method, List<dynamic> params);
 
 class ETHRpc {
-  static ETHRpc __instance;
+  static ETHRpc? __instance;
   static void createInstance(ETHCallback cb) {
     __instance = ETHRpc(cb);
   }
-  static ETHRpc instance() => __instance;
+  static ETHRpc? instance() => __instance;
 
   ETHCallback callback;
   ETHRpc(this.callback): ethCallCache = {}, erc20Cache = {};
-  Map<String, Map<String, dynamic>> ethCallCache;
+  Map<String, Map<String, dynamic>?> ethCallCache;
   Map<String, List<dynamic>> erc20Cache;
 
-  ContractABI _getContractABI(String address, String type) {
-    var cfg = getContractConfigByAddress(address);
-    if(cfg == null && type == null) {
+  ContractABI _getContractABI(String address, String? type,[int chainId = 1]) {
+    var cfg = getContractConfigByAddress(address,chainId);
+    var abiType = cfg == null ? type : cfg.type;
+    if(abiType == null) {
       throw Exception("Unconfigured contract address 0x${address}");
     }
-
-    var abiType = cfg == null ? type : cfg.type;
     var abi = getContractABIByType(abiType);
     if(abi == null) {
       throw Exception("Unconfigured abi type ${abiType}");
@@ -50,9 +49,14 @@ class ETHRpc {
   }
 
   Future<int> estimateGas(String address, BigInt value, String method, Map<String, dynamic> args,
-      {String type = null}) async {
-    var abi = _getContractABI(strip0x(address), type);
-    var payload = hex.encode(getContractCallPayload(abi, method, args));
+      {String? type,int chainId = 1}) async {
+    var abi = _getContractABI(strip0x(address),type,chainId);
+    final p = getContractCallPayload(abi, method, args);
+    var payload = '';
+    if(p != null){
+       payload = hex.encode(p.toList());
+    }
+
     return estimateGasRaw(append0x(address), "0x" + value.toRadixString(16), "0x" + payload);
   }
 
@@ -74,7 +78,7 @@ class ETHRpc {
   /// 
   /// if timeout == -1, result is cached permenently
   /// else, result is cached for ${timeout} seconds
-  Future<Map<String, dynamic>> ethCall(String address, String method, Map<String, dynamic> args, {String type = null, int timeout = -1}) async {
+  Future<Map<String, dynamic>?> ethCall(String address, String method, Map<String, dynamic> args, {String? type, int timeout = -1}) async {
     var cacheKey = '';
     cacheKey += strip0x(address).toLowerCase();
     cacheKey += '|$method';
@@ -88,7 +92,12 @@ class ETHRpc {
     }
 
     var abi = _getContractABI(strip0x(address), type);
-    var payload = hex.encode(getContractCallPayload(abi, method, args));
+
+    final p = getContractCallPayload(abi, method, args);
+    var payload = '';
+    if(p != null){
+      payload = hex.encode(p.toList());
+    }
     var result = (await callback('eth_call', [{"to": append0x(address), "data": "0x" + payload}, "latest"])) as String;
     result = strip0x(result);
     
@@ -104,7 +113,7 @@ class ETHRpc {
   /// Calls contract to get name, symbol, decimals and totalSupply of given ERC20 token
   /// 
   /// Will not check whether the contract deployed at [address] is real ERC20 or not
-  Future<List<dynamic>> getERC20Config(String address) async {
+  Future<List<dynamic>?> getERC20Config(String address) async {
     address = strip0x(address).toLowerCase();
     if(erc20Cache.containsKey(address)) {
       return erc20Cache[address];
@@ -159,6 +168,9 @@ class ETHRpc {
     });
 
     var r = await ethCall(multicallCfg.address, 'aggregate', {'calls': callArgs});
+    if(r == null){
+      throw Exception("Unmatched call and return r");
+    }
     var returnData = r['returnData'] as List;
     if(returnData.length != callAbis.length) {
       throw Exception("Unmatched call and return data");
@@ -166,7 +178,11 @@ class ETHRpc {
 
     List<Map<String, dynamic>> results = [];
     for(var i = 0; i < callAbis.length; i++) {
-      results.add(callAbis[i].decomposeResult(callMethods[i], Uint8List.fromList(returnData[i] as List<int>)));
+      final re = callAbis[i].decomposeResult(callMethods[i], Uint8List.fromList(returnData[i] as List<int>));
+      if(re == null){
+        throw Exception("Unmatched call and return decomposeResult");
+      }
+      results.add(re);
     }
     return results;
   }

@@ -14,17 +14,17 @@ import 'rpc.dart';
 /// 
 /// return a list of [name, symbol, decimals] of ERC20
 /// if address is configured locally, will just fetch
-Future<List<dynamic>> _getERC20Config(String address) async {
+Future<List<dynamic>?> _getERC20Config(String address) async {
   var localConfig = getContractConfigByAddress(address);
   if( localConfig != null && 
       localConfig.type == 'ERC20' &&
       localConfig.params != null &&
-      localConfig.params.containsKey('name') &&
-      localConfig.params.containsKey('decimal')) {
-    return [localConfig.params['name'], localConfig.symbol, localConfig.params['decimal']];
+      localConfig.params!.containsKey('name') &&
+      localConfig.params!.containsKey('decimal')) {
+    return [localConfig.params!['name'], localConfig.symbol, localConfig.params!['decimal']];
   }
 
-  return (await ETHRpc.instance().getERC20Config(address)).sublist(0, 3);
+  return (await ETHRpc.instance()?.getERC20Config(address))?.sublist(0, 3);
 }
 
 class CallTrans {
@@ -132,8 +132,12 @@ class CallTrans {
           argMap[argName] = argVal;
         }
         var resField = stack.removeLast() as String;
-        var res = await ETHRpc.instance().ethCall(targetAddr, method, argMap);
-        stackAdd(res[resField]);
+        var res = await ETHRpc.instance()?.ethCall(targetAddr, method, argMap);
+        final rf = res?[resField];
+        if(rf != null){
+          stackAdd(rf);
+        }
+
         continue;
       }
 
@@ -150,7 +154,12 @@ class CallTrans {
       if(op == 'SYMBOL') { // Pops erc20 address from stack and push back symbol
         var addr = stack.removeLast() as String;
         var cfg = await _getERC20Config(addr);
-        stackAdd(cfg[1]);
+        final v = cfg?[1];
+        if(v != null){
+          stackAdd(v.toString());
+        } else {
+          stackAdd("");
+        }
         continue;
       }
 
@@ -158,7 +167,12 @@ class CallTrans {
         var addr = stack.removeLast() as String;
         try {
           var cfg = await _getERC20Config(addr);
-          stackAdd(cfg[1].toString());
+          final v = cfg?[1];
+          if(v != null){
+            stackAdd(v.toString());
+          } else {
+            stackAdd("");
+          }
         } on Exception {
           stackAdd("");
         }
@@ -168,7 +182,12 @@ class CallTrans {
       if(op == 'DECIMAL') { // Pops erc20 address from stack and push back decimal
         var addr = stack.removeLast() as String;
         var cfg = await _getERC20Config(addr);
-        stackAdd(cfg[2].toString());
+        final v = cfg?[2];
+        if(v != null){
+          stackAdd(v.toString());
+        } else {
+          stackAdd("");
+        }
         continue;
       }
 
@@ -176,7 +195,12 @@ class CallTrans {
         var addr = stack.removeLast() as String;
         try {
           var cfg = await _getERC20Config(addr);
-          stackAdd(cfg[2].toString());
+          final v = cfg?[2];
+          if(v != null){
+            stackAdd(v.toString());
+          } else {
+            stackAdd("");
+          }
         } on Exception {
           stackAdd("0");
         }
@@ -230,7 +254,7 @@ class CallTrans {
 /// Translator.createInstance(configs, erc20_cb, ethcall_cb);
 /// var description = await Translator.instance().translate()
 class Translator {
-  static Translator __instance = null;
+  static Translator? __instance = null;
   static void createInstance(List<dynamic> configs) {
     __instance = Translator(configs);
   }
@@ -240,7 +264,7 @@ class Translator {
   static Translator instance() {
     if(__instance == null)
       throw Exception('translator not initialized');
-    return __instance;
+    return __instance!;
   }
 
   final Map<String, CallTrans> transConfig;
@@ -252,29 +276,29 @@ class Translator {
 
   /// try to translate transaction into human readable sentence
   /// if unable to translate, return null
-  static Future<String> translate(EthereumTransaction tx) async {
+  static Future<String?> translate(EthereumTransaction tx) async {
     if(!initialized) {
       return null;
     }
 
     try {
-      if(tx.input.length != 0) {
+      if(tx.input !=null && tx.input!.length != 0) {
         var cfg = getContractConfigByAddress(tx.to.toString());
         if(cfg == null)
           return null;
         var abi = getContractABIByType(cfg.type);
         if(abi == null)
           return null;
-        var callInfo = ContractCall.fromBinary(tx.input, abi);
+        var callInfo = ContractCall.fromBinary(tx.input!, abi);
         var methodId = '${cfg.type}_${callInfo.functionName}';
         // print(methodId);
         if(!instance().transConfig.containsKey(methodId)) {
           return null;
         }
         // print(callInfo.callParams);
-        return await instance().transConfig[methodId].translate(tx.value, tx.to.toString(), callInfo.callParams);
+        return await instance().transConfig[methodId]?.translate(tx.value, tx.to.toString(), callInfo.callParams);
       } else {
-        return await instance().transConfig['ETH_transfer'].translate(tx.value, tx.to.toString(), {});
+        return await instance().transConfig['ETH_transfer']?.translate(tx.value, tx.to.toString(), {});
       }
     } catch (e) {
     }

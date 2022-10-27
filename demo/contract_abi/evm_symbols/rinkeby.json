@@ -1,0 +1,22 @@
+{
+  "chainId": 4,
+  "contracts": [
+    {
+      "address": "0xf57b2c51ded3a29e6891aba85459d600256cf317",
+      "symbol": "OpenSea: Registry",
+      "type": "OPENSEA",
+      "params": {
+        "allowApprove": true
+      }
+    },
+		{
+      "address": "0x5206e78b21Ce315ce284FB24cf05e0585A93B1d9",
+      "symbol": "Opensea",
+      "type": "OPENSEA",
+      "params": {
+        "allowApprove": true
+      }
+    }
+  ],
+  "abis": []
+}

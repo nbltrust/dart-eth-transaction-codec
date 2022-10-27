@@ -1,0 +1,49 @@
+[
+	{
+    "name": "claim",
+    "outputs": [
+      {
+        "type": "uint256",
+        "name": ""
+      }
+    ],
+    "inputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "name": "claim",
+    "outputs": [
+      {
+        "type": "uint256",
+        "name": ""
+      }
+    ],
+    "inputs": [
+      {
+        "type": "address",
+        "name": "addr"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "name": "claim_many",
+    "outputs": [
+      {
+        "type": "bool",
+        "name": ""
+      }
+    ],
+    "inputs": [
+      {
+        "type": "address[20]",
+        "name": "receivers"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function",
+    "gas": 26281905
+  }
+]

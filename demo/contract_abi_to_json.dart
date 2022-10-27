@@ -3,7 +3,7 @@ import 'dart:io';
 
 Map<String, dynamic> contractAbiToJson(String dirname) {
   Map<String, dynamic> result = new Map();
-  List<dynamic> abis = new List();
+  List<dynamic> abis = [];
 
   var symbol_file = new File('${dirname}/contract_symbols.json');
   var symbols = symbol_file.readAsStringSync();

@@ -6,8 +6,11 @@ void main() async {
   initAbi();
 
   var getContractInfo = (String trxHash) async {
-    var trxJson = await ETHRpc.instance().getTransactionByHash(trxHash);
-    var trx = EthereumTransaction.fromJson(trxJson);
+    var trxJson = await ETHRpc.instance()?.getTransactionByHash(trxHash);
+    if(trxJson == null){
+      throwsException;
+    }
+    var trx = EthereumTransaction.fromJson(trxJson!);
     return trx.getContractInfo();
   };
 
@@ -18,21 +21,30 @@ void main() async {
 
   test('test ERC20 approve', () async {
     var info = await getContractInfo('0x493aadbfe79cd624ac05fa36e7ae224f57ec44327ea5cdbc11448a263428d599');
-    expect(info['symbol'], 'aDAI');
+    if(info == null){
+      throwsException;
+    }
+    expect(info!['symbol'], 'aDAI');
     expect(info['type'], 'ERC20');
     expect(info['method'], 'approve');
   });
 
   test('test UNISWAP swapETHForExactTokens', () async {
     var info = await getContractInfo('0x71665eec814d811c0dfc9488566bc7dbde73616f6f3ea2e1b81b1626f0f0011d');
-    expect(info['symbol'], 'UNISWAP');
+    if(info == null){
+      throwsException;
+    }
+    expect(info!['symbol'], 'UNISWAP');
     expect(info['type'], 'UNISWAP');
     expect(info['method'], 'swapETHForExactTokens');
   });
 
   test('test ERC20 transfer', () async {
     var info = await getContractInfo('0x3dc84ea3a2f2e641d8f0a5a722cbc9fde930e67bcfc1a8d4fa494b7979da79b9');
-    expect(info['symbol'], 'USDT');
+    if(info == null){
+      throwsException;
+    }
+    expect(info!['symbol'], 'USDT');
     expect(info['type'], 'ERC20');
     expect(info['method'], 'transfer');
   });

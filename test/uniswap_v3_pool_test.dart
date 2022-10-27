@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:convert/convert.dart';
 import 'package:decimal/decimal.dart';
@@ -48,17 +49,17 @@ Future<ParsedResult> parseMint(ContractCall callInfo, dynamic tx) async {
   final args = [[], []];
 
   if (amount0Min <= Decimal.zero || amount0Min == amount0Desired) {
-    args[0].addAll([amount0Desired / Decimal.parse('1e' + token0.params['decimal']), token0Symbol]);
+    args[0].addAll([(amount0Desired / Decimal.parse('1e' + token0.params?['decimal'])).toDecimal().toString(), token0Symbol]);
   } else {
     args[0]
-        .addAll(['≥', amount0Min / Decimal.parse('1e' + token0.params['decimal']), token0Symbol]);
+        .addAll(['≥', (amount0Min / Decimal.parse('1e' + token0.params?['decimal'])).toDecimal().toString(), token0Symbol]);
   }
 
   if (amount1Min <= Decimal.zero || amount0Min == amount0Desired) {
-    args[1].addAll([amount1Desired / Decimal.parse('1e' + token1.params['decimal']), token1Symbol]);
+    args[1].addAll([(amount1Desired / Decimal.parse('1e' + token1.params?['decimal'])).toDecimal().toString(), token1Symbol]);
   } else {
     args[1]
-        .addAll(['≥', amount1Min / Decimal.parse('1e' + token1.params['decimal']), token1Symbol]);
+        .addAll(['≥', (amount1Min / Decimal.parse('1e' + token1.params?['decimal'])).toDecimal().toString(), token1Symbol]);
   }
 
   return ParsedResult(recipient, ['mint', args[0], args[1]]);
@@ -72,12 +73,11 @@ Future<ParsedResult> parseIncreaseLiquidity(ContractCall callInfo, dynamic tx) a
 
   var positions;
   try {
-    positions = await ETHRpc.instance()
-        .ethCall('0xc36442b4a4522e871399cd717abdd847ab11fe88', 'positions', {'tokenId': tokenId});
+    positions = await ETHRpc.instance()?.ethCall('0xc36442b4a4522e871399cd717abdd847ab11fe88', 'positions', {'tokenId': tokenId});
   } catch (e) {
     return ParsedResult(recipient, []);
   }
-
+  print("---------------- positions $positions");
   final token0Addr = positions["token0"];
   final token1Addr = positions["token1"];
 
@@ -106,17 +106,17 @@ Future<ParsedResult> parseIncreaseLiquidity(ContractCall callInfo, dynamic tx) a
   final args = [[], []];
 
   if (amount0Min <= Decimal.zero || amount0Min == amount0Desired) {
-    args[0].addAll([amount0Desired / Decimal.parse('1e' + token0.params['decimal']), token0Symbol]);
+    args[0].addAll([(amount0Desired / Decimal.parse('1e' + token0.params?['decimal'])).toDecimal().toString(), token0Symbol]);
   } else {
     args[0]
-        .addAll(['≥', amount0Min / Decimal.parse('1e' + token0.params['decimal']), token0Symbol]);
+        .addAll(['≥', (amount0Min / Decimal.parse('1e' + token0.params?['decimal'])).toDecimal().toString(), token0Symbol]);
   }
 
   if (amount1Min <= Decimal.zero || amount1Min == amount1Desired) {
-    args[1].addAll([amount1Desired / Decimal.parse('1e' + token1.params['decimal']), token1Symbol]);
+    args[1].addAll([(amount1Desired / Decimal.parse('1e' + token1.params?['decimal'])).toDecimal(), token1Symbol]);
   } else {
     args[1]
-        .addAll(['≥', amount1Min / Decimal.parse('1e' + token1.params['decimal']), token1Symbol]);
+        .addAll(['≥', (amount1Min / Decimal.parse('1e' + token1.params?['decimal'])).toDecimal().toString(), token1Symbol]);
   }
 
   return ParsedResult(recipient, ['increaseLiquidity', args[0], args[1]]);
@@ -130,8 +130,7 @@ Future<ParsedResult> parseDecreaseLiquidity(ContractCall callInfo, dynamic tx) a
 
   var positions;
   try {
-    positions = await ETHRpc.instance()
-        .ethCall('0xc36442b4a4522e871399cd717abdd847ab11fe88', 'positions', {'tokenId': tokenId});
+    positions = await ETHRpc.instance()?.ethCall('0xc36442b4a4522e871399cd717abdd847ab11fe88', 'positions', {'tokenId': tokenId});
   } catch (e) {
     return ParsedResult(recipient, []);
   }
@@ -151,8 +150,8 @@ Future<ParsedResult> parseDecreaseLiquidity(ContractCall callInfo, dynamic tx) a
 
   final args = [[], []];
 
-  args[0].addAll(['≥', amount0Min / Decimal.parse('1e' + token0.params['decimal']), token0.symbol]);
-  args[1].addAll(['≥', amount1Min / Decimal.parse('1e' + token1.params['decimal']), token1.symbol]);
+  args[0].addAll(['≥', (amount0Min / Decimal.parse('1e' + token0.params?['decimal'])).toDecimal().toString(), token0.symbol]);
+  args[1].addAll(['≥', (amount1Min / Decimal.parse('1e' + token1.params?['decimal'])).toDecimal().toString(), token1.symbol]);
 
   return ParsedResult(recipient, ['decreaseLiquidity', args[0], args[1]]);
 }
@@ -164,8 +163,7 @@ Future<ParsedResult> parseCollect(ContractCall callInfo, dynamic tx) async {
 
   var positions;
   try {
-    positions = await ETHRpc.instance()
-        .ethCall('0xc36442b4a4522e871399cd717abdd847ab11fe88', 'positions', {'tokenId': tokenId});
+    positions = await ETHRpc.instance()?.ethCall('0xc36442b4a4522e871399cd717abdd847ab11fe88', 'positions', {'tokenId': tokenId});
   } catch (e) {
     return ParsedResult(recipient, []);
   }
@@ -191,14 +189,14 @@ Future<ParsedResult> parseCollect(ContractCall callInfo, dynamic tx) async {
     args[0].addAll(['all', token0.symbol]);
   } else {
     args[0]
-        .addAll(['≤', amount0Max / Decimal.parse('1e' + token0.params['decimal']), token0.symbol]);
+        .addAll(['≤', (amount0Max / Decimal.parse('1e' + token0.params?['decimal'])).toDecimal().toString(), token0.symbol]);
   }
 
   if (amount1Max >= tokensOwed1 || amount1Max >= UINT128MAX) {
     args[1].addAll(['all', token1.symbol]);
   } else {
     args[1]
-        .addAll(['≤', amount0Max / Decimal.parse('1e' + token1.params['decimal']), token1.symbol]);
+        .addAll(['≤', (amount0Max / Decimal.parse('1e' + token1.params?['decimal'])).toDecimal().toString(), token1.symbol]);
   }
 
   return ParsedResult(recipient, ['collect', args[0], args[1]]);
@@ -208,7 +206,7 @@ Future<ParsedResult> parseMulticall(ContractCall callInfo, dynamic tx) async {
   final abi = getContractABIByType('UNISWAP V3 POOL');
 
   final bytesArray = callInfo.callParams['data'];
-  final subcallArray = bytesArray.map((bytes) => abi.decomposeCall(bytes)).toList();
+  final subcallArray = bytesArray.map((bytes) => abi?.decomposeCall(bytes)).toList();
 
   Set<String> recipients = Set();
   List<dynamic> stack = [];
@@ -257,7 +255,7 @@ Future<ParsedResult> parseMulticall(ContractCall callInfo, dynamic tx) async {
             recipients.add(recipient);
 
             final amountMinimum = Decimal.parse(callInfo.callParams['amountMinimum'].toString());
-            weth[weth.length - 2] = amountMinimum / Decimal.parse('1e18');
+            weth[weth.length - 2] = (amountMinimum / Decimal.parse('1e18')).toDecimal().toString();
           }
         }
         continue;
@@ -308,12 +306,12 @@ void main() async {
         int.parse('75c43', radix: 16),
         int.parse('165a0bc00', radix: 16),
         int.parse('8', radix: 16),
-        input: hex.decode(
-            "88316456000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48000000000000000000000000dac17f958d2ee523a2206206994597c13d831ec700000000000000000000000000000000000000000000000000000000000001f4ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe2000000000000000000000000000000000000000000000000000000000000001e0000000000000000000000000000000000000000000000000000000005e679480000000000000000000000000000000000000000000000000000000006c25b9300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a4de56c4ca6d5303f29e0d1c53abb51427bfe5900000000000000000000000000000000000000000000000000000000060e37edb"));
+        input: Uint8List.fromList(hex.decode(
+            "88316456000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48000000000000000000000000dac17f958d2ee523a2206206994597c13d831ec700000000000000000000000000000000000000000000000000000000000001f4ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe2000000000000000000000000000000000000000000000000000000000000001e0000000000000000000000000000000000000000000000000000000005e679480000000000000000000000000000000000000000000000000000000006c25b9300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a4de56c4ca6d5303f29e0d1c53abb51427bfe5900000000000000000000000000000000000000000000000000000000060e37edb")));
 
     final contract = tx.getContractInfo();
     final callInfo =
-        ContractCall.fromJson({'function': contract['method'], 'params': contract['params']});
+        ContractCall.fromJson({'function': contract?['method'], 'params': contract?['params']});
 
     final parsed = await parseMint(callInfo, tx);
     expect(parsed.recipient, tx.from.toString());
@@ -331,12 +329,12 @@ void main() async {
         int.parse('91ede', radix: 16),
         int.parse('6bc5cc480', radix: 16),
         int.parse('27', radix: 16),
-        input: hex.decode(
-            "88316456000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc2000000000000000000000000dac17f958d2ee523a2206206994597c13d831ec70000000000000000000000000000000000000000000000000000000000000bb8fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffcd3a8fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffce50000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002faf08000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002faf080000000000000000000000000d1cb9c1be330cfbc8b87e8d0d8352295ab4e96650000000000000000000000000000000000000000000000000000000060f1591e"));
+        input: Uint8List.fromList(hex.decode(
+            "88316456000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc2000000000000000000000000dac17f958d2ee523a2206206994597c13d831ec70000000000000000000000000000000000000000000000000000000000000bb8fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffcd3a8fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffce50000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002faf08000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002faf080000000000000000000000000d1cb9c1be330cfbc8b87e8d0d8352295ab4e96650000000000000000000000000000000000000000000000000000000060f1591e")));
 
     final contract = tx.getContractInfo();
     final callInfo =
-        ContractCall.fromJson({'function': contract['method'], 'params': contract['params']});
+        ContractCall.fromJson({'function': contract?['method'], 'params': contract?['params']});
 
     final parsed = await parseMint(callInfo, tx);
     expect(parsed.recipient, tx.from.toString());
@@ -355,12 +353,12 @@ void main() async {
         int.parse('5c763', radix: 16),
         int.parse('832156000', radix: 16),
         int.parse('1a', radix: 16),
-        input: hex.decode(
-            "219f5d1700000000000000000000000000000000000000000000000000000000000147320000000000000000000000000000000000000000000000001142529a60652714000000000000000000000000000000000000000000000000000000000c49019d000000000000000000000000000000000000000000000000111daf0412b440c8000000000000000000000000000000000000000000000000000000000c3363320000000000000000000000000000000000000000000000000000000060f10a70"));
+        input: Uint8List.fromList(hex.decode(
+            "219f5d1700000000000000000000000000000000000000000000000000000000000147320000000000000000000000000000000000000000000000001142529a60652714000000000000000000000000000000000000000000000000000000000c49019d000000000000000000000000000000000000000000000000111daf0412b440c8000000000000000000000000000000000000000000000000000000000c3363320000000000000000000000000000000000000000000000000000000060f10a70")));
 
     final contract = tx.getContractInfo();
     final callInfo =
-        ContractCall.fromJson({'function': contract['method'], 'params': contract['params']});
+        ContractCall.fromJson({'function': contract?['method'], 'params': contract?['params']});
 
     final parsed = await parseIncreaseLiquidity(callInfo, tx);
     expect(parsed.recipient, tx.from.toString());
@@ -379,12 +377,12 @@ void main() async {
         int.parse('75c43', radix: 16),
         int.parse('165a0bc00', radix: 16),
         int.parse('8', radix: 16),
-        input: hex.decode(
-            "fc6f786500000000000000000000000000000000000000000000000000000000000113ac000000000000000000000000a6c6d80734dc5469a8d1cd790653fb3e1f97170000000000000000000000000000000000ffffffffffffffffffffffffffffffff00000000000000000000000000000000ffffffffffffffffffffffffffffffff"));
+        input: Uint8List.fromList(hex.decode(
+            "fc6f786500000000000000000000000000000000000000000000000000000000000113ac000000000000000000000000a6c6d80734dc5469a8d1cd790653fb3e1f97170000000000000000000000000000000000ffffffffffffffffffffffffffffffff00000000000000000000000000000000ffffffffffffffffffffffffffffffff")));
 
     final contract = tx.getContractInfo();
     final callInfo =
-        ContractCall.fromJson({'function': contract['method'], 'params': contract['params']});
+        ContractCall.fromJson({'function': contract?['method'], 'params': contract?['params']});
 
     final parsed = await parseCollect(callInfo, tx);
     expect(parsed.recipient, tx.from.toString());
@@ -404,12 +402,12 @@ void main() async {
         int.parse('4c592', radix: 16),
         int.parse('4a817c800', radix: 16),
         int.parse('28', radix: 16),
-        input: hex.decode(
-            "ac9650d80000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000160000000000000000000000000000000000000000000000000000000000000022000000000000000000000000000000000000000000000000000000000000002a000000000000000000000000000000000000000000000000000000000000000a40c49ccbe0000000000000000000000000000000000000000000000000000000000014bb6000000000000000000000000000000000000000000000000000005ff270116cd00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002faf07f0000000000000000000000000000000000000000000000000000000060f4f14a000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000084fc6f78650000000000000000000000000000000000000000000000000000000000014bb6000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffff00000000000000000000000000000000ffffffffffffffffffffffffffffffff00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004449404b7c0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000d1cb9c1be330cfbc8b87e8d0d8352295ab4e9665000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000064df2ab5bb000000000000000000000000dac17f958d2ee523a2206206994597c13d831ec70000000000000000000000000000000000000000000000000000000002faf07f000000000000000000000000d1cb9c1be330cfbc8b87e8d0d8352295ab4e966500000000000000000000000000000000000000000000000000000000"));
+        input: Uint8List.fromList(hex.decode(
+            "ac9650d80000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000160000000000000000000000000000000000000000000000000000000000000022000000000000000000000000000000000000000000000000000000000000002a000000000000000000000000000000000000000000000000000000000000000a40c49ccbe0000000000000000000000000000000000000000000000000000000000014bb6000000000000000000000000000000000000000000000000000005ff270116cd00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002faf07f0000000000000000000000000000000000000000000000000000000060f4f14a000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000084fc6f78650000000000000000000000000000000000000000000000000000000000014bb6000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffff00000000000000000000000000000000ffffffffffffffffffffffffffffffff00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004449404b7c0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000d1cb9c1be330cfbc8b87e8d0d8352295ab4e9665000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000064df2ab5bb000000000000000000000000dac17f958d2ee523a2206206994597c13d831ec70000000000000000000000000000000000000000000000000000000002faf07f000000000000000000000000d1cb9c1be330cfbc8b87e8d0d8352295ab4e966500000000000000000000000000000000000000000000000000000000")));
 
     final contract = tx.getContractInfo();
     final callInfo =
-        ContractCall.fromJson({'function': contract['method'], 'params': contract['params']});
+        ContractCall.fromJson({'function': contract?['method'], 'params': contract?['params']});
 
     final parsed = await parseMulticall(callInfo, tx);
     expect(parsed.recipient, tx.from.toString());
@@ -428,12 +426,12 @@ void main() async {
         int.parse('44bbe', radix: 16),
         int.parse('342770c00', radix: 16),
         int.parse('2b', radix: 16),
-        input: hex.decode(
-            "ac9650d8000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000012000000000000000000000000000000000000000000000000000000000000000a40c49ccbe0000000000000000000000000000000000000000000000000000000000015af10000000000000000000000000000000000000000000000000000020e3cdff679000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000017d783f0000000000000000000000000000000000000000000000000000000060f4f826000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000084fc6f78650000000000000000000000000000000000000000000000000000000000015af1000000000000000000000000d1cb9c1be330cfbc8b87e8d0d8352295ab4e966500000000000000000000000000000000ffffffffffffffffffffffffffffffff00000000000000000000000000000000ffffffffffffffffffffffffffffffff00000000000000000000000000000000000000000000000000000000"));
+        input: Uint8List.fromList(hex.decode(
+            "ac9650d8000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000012000000000000000000000000000000000000000000000000000000000000000a40c49ccbe0000000000000000000000000000000000000000000000000000000000015af10000000000000000000000000000000000000000000000000000020e3cdff679000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000017d783f0000000000000000000000000000000000000000000000000000000060f4f826000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000084fc6f78650000000000000000000000000000000000000000000000000000000000015af1000000000000000000000000d1cb9c1be330cfbc8b87e8d0d8352295ab4e966500000000000000000000000000000000ffffffffffffffffffffffffffffffff00000000000000000000000000000000ffffffffffffffffffffffffffffffff00000000000000000000000000000000000000000000000000000000")));
 
     final contract = tx.getContractInfo();
     final callInfo =
-        ContractCall.fromJson({'function': contract['method'], 'params': contract['params']});
+        ContractCall.fromJson({'function': contract?['method'], 'params': contract?['params']});
 
     final parsed = await parseMulticall(callInfo, tx);
     expect(parsed.recipient, tx.from.toString());

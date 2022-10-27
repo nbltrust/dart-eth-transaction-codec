@@ -7,8 +7,11 @@ void main() async {
 
   var runTrans = (String tag, String trxHash, String expected) {
     test(tag, () async{
-      var trxJson = await ETHRpc.instance().getTransactionByHash(trxHash);
-      var trx = EthereumTransaction.fromJson(trxJson);
+      var trxJson = await ETHRpc.instance()?.getTransactionByHash(trxHash);
+      if(trxJson == null){
+        throwsException;
+      }
+      var trx = EthereumTransaction.fromJson(trxJson!);
       expect(await trx.getDescription(), expected);
     });
   };

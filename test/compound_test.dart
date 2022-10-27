@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:convert/convert.dart';
 import 'package:decimal/decimal.dart';
@@ -13,7 +14,7 @@ final UINT256MAX =
     Decimal.parse('115792089237316195423570985008687907853269984665640564039457584007913129639935');
 
 class ParsedResult {
-  final String recipient;
+  final String? recipient;
   final List<dynamic> args;
 
   ParsedResult(this.recipient, this.args);
@@ -21,55 +22,57 @@ class ParsedResult {
 
 Future<ParsedResult> parseMint(ContractCall callInfo, dynamic tx) async {
   final tokenOut = getContractConfigByAddress(tx.to.toString());
-  final symbolIn = tokenOut.symbol.substring(1);
+  final symbolIn = tokenOut?.symbol.substring(1);
 
   var decimal = '18';
   if (symbolIn != 'ETH') {
-    final tokenIn = getContractConfigBySymbol(symbolIn);
-    decimal = tokenIn.params['decimal']?.toString() ?? decimal;
+    final tokenIn = getContractConfigBySymbol(symbolIn!);
+    decimal = tokenIn?.params?['decimal']?.toString() ?? decimal;
   }
 
   final mintAmount = callInfo.callParams['mintAmount'];
 
-  var amount;
+  Decimal amount;
   if (mintAmount == null) {
     amount = Decimal.parse(tx.value.toString());
   } else {
     amount = Decimal.parse(mintAmount.toString());
   }
-
-  return ParsedResult(tx.from.toString(), [amount / Decimal.parse('1e' + decimal), symbolIn]);
+  final a = (amount/Decimal.parse('1e' + decimal)).toDecimal().toString();
+  return ParsedResult(tx.from.toString(), [a, symbolIn]);
 }
 
 Future<ParsedResult> parseBorrow(ContractCall callInfo, dynamic tx) async {
   final tokenOut = getContractConfigByAddress(tx.to.toString());
-  final symbolIn = tokenOut.symbol.substring(1);
+  final symbolIn = tokenOut?.symbol.substring(1);
 
   var decimal = '18';
   if (symbolIn != 'ETH') {
-    final tokenIn = getContractConfigBySymbol(symbolIn);
-    decimal = tokenIn.params['decimal']?.toString() ?? decimal;
+    final tokenIn = getContractConfigBySymbol(symbolIn!);
+    decimal = tokenIn?.params?['decimal']?.toString() ?? decimal;
   }
 
   final borrowAmount = callInfo.callParams['borrowAmount'];
   final amount = Decimal.parse(borrowAmount.toString());
 
-  return ParsedResult(tx.from.toString(), [amount / Decimal.parse('1e' + decimal), symbolIn]);
+  return ParsedResult(tx.from.toString(), [(amount / Decimal.parse('1e' + decimal)).toDecimal().toString(), symbolIn]);
 }
 
 Future<ParsedResult> parseRepayBorrow(ContractCall callInfo, dynamic tx) async {
   final tokenOut = getContractConfigByAddress(tx.to.toString());
-  final symbolIn = tokenOut.symbol.substring(1);
-
+  final symbolIn = tokenOut?.symbol.substring(1);
+  if(tokenOut == null){
+    return ParsedResult('error', []);
+  }
   var decimal = '18';
   if (symbolIn != 'ETH') {
-    final tokenIn = getContractConfigBySymbol(symbolIn);
-    decimal = tokenIn.params['decimal']?.toString() ?? decimal;
+    final tokenIn = getContractConfigBySymbol(symbolIn!);
+    decimal = tokenIn?.params?['decimal']?.toString() ?? decimal;
   }
 
   final repayAmount = callInfo.callParams['repayAmount'];
 
-  var amount;
+  Decimal amount;
   if (repayAmount == null) {
     amount = Decimal.parse(tx.value.toString());
   } else {
@@ -80,14 +83,16 @@ Future<ParsedResult> parseRepayBorrow(ContractCall callInfo, dynamic tx) async {
     return ParsedResult(tx.from.toString(), ['all', symbolIn]);
   }
 
-  return ParsedResult(tx.from.toString(), [amount / Decimal.parse('1e' + decimal), symbolIn]);
+  return ParsedResult(tx.from.toString(), [(amount / Decimal.parse('1e' + decimal)).toDecimal().toString(), symbolIn]);
 }
 
 Future<ParsedResult> parseRedeem(ContractCall callInfo, dynamic tx) async {
   final recipient = tx.from.toString();
   final tokenOut = getContractConfigByAddress(tx.to.toString());
-  final symbolIn = tokenOut.symbol.substring(1);
-
+  final symbolIn = tokenOut?.symbol.substring(1);
+  if(tokenOut == null){
+    return ParsedResult('error', []);
+  }
   final redeemTokens = Decimal.parse(callInfo.callParams['redeemTokens'].toString());
 
   if (redeemTokens >= UINT256MAX) {
@@ -96,8 +101,8 @@ Future<ParsedResult> parseRedeem(ContractCall callInfo, dynamic tx) async {
 
   var exchangeRateStored;
   try {
-    final res = (await ETHRpc.instance().ethCall(tx.to.toString(), 'exchangeRateStored', {}));
-    final rate = res.values.first;
+    final res = (await ETHRpc.instance()?.ethCall(tx.to.toString(), 'exchangeRateStored', {}));
+    final rate = res?.values.first;
     exchangeRateStored = Decimal.parse(rate.toString());
   } catch (e) {
     return ParsedResult(recipient, []);
@@ -105,8 +110,8 @@ Future<ParsedResult> parseRedeem(ContractCall callInfo, dynamic tx) async {
 
   var decimal = 18;
   if (symbolIn != 'ETH') {
-    final tokenIn = getContractConfigBySymbol(symbolIn);
-    final d = tokenIn.params['decimal']?.toString() ?? '18';
+    final tokenIn = getContractConfigBySymbol(symbolIn!);
+    final d = tokenIn?.params?['decimal']?.toString() ?? '18';
     decimal = int.parse(d);
   }
 
@@ -124,12 +129,14 @@ Future<ParsedResult> parseRedeem(ContractCall callInfo, dynamic tx) async {
 
 Future<ParsedResult> parseRedeemUnderlying(ContractCall callInfo, dynamic tx) async {
   final tokenOut = getContractConfigByAddress(tx.to.toString());
-  final symbolIn = tokenOut.symbol.substring(1);
-
+  final symbolIn = tokenOut?.symbol.substring(1);
+  if(tokenOut == null){
+    return ParsedResult('error', []);
+  }
   var decimal = '18';
   if (symbolIn != 'ETH') {
-    final tokenIn = getContractConfigBySymbol(symbolIn);
-    decimal = tokenIn.params['decimal']?.toString() ?? decimal;
+    final tokenIn = getContractConfigBySymbol(symbolIn!);
+    decimal = tokenIn?.params?['decimal']?.toString() ?? decimal;
   }
 
   final redeemAmount = callInfo.callParams['redeemAmount'];
@@ -139,7 +146,7 @@ Future<ParsedResult> parseRedeemUnderlying(ContractCall callInfo, dynamic tx) as
     return ParsedResult(tx.from.toString(), ['all', symbolIn]);
   }
 
-  return ParsedResult(tx.from.toString(), [amount / Decimal.parse('1e' + decimal), symbolIn]);
+  return ParsedResult(tx.from.toString(), [(amount / Decimal.parse('1e' + decimal)).toDecimal().toString(), symbolIn]);
 }
 
 Future<ParsedResult> parseTransfer(ContractCall callInfo, dynamic tx) async {
@@ -147,24 +154,24 @@ Future<ParsedResult> parseTransfer(ContractCall callInfo, dynamic tx) async {
 
   final dst = callInfo.callParams['dst'].toString();
   final amount = Decimal.parse(callInfo.callParams['amount'].toString());
-  final decimal = token.params['decimal'].toString();
+  final decimal = token?.params?['decimal'].toString() ?? '';
 
   return ParsedResult(
-      dst, [amount / Decimal.parse('1e' + decimal), token.symbol, toChecksumAddress(dst)]);
+      dst, [(amount / Decimal.parse('1e' + decimal)).toDecimal().toString(), token?.symbol, toChecksumAddress(dst)]);
 }
 
 Future<ParsedResult> parseApprove(ContractCall callInfo, dynamic tx) async {
   final token = getContractConfigByAddress(tx.to.toString());
 
   final amount = Decimal.parse(callInfo.callParams['amount'].toString());
-  final decimal = token.params['decimal'].toString();
+  final decimal = token?.params?['decimal'].toString() ??'';
 
   final spender = getContractConfigByAddress(callInfo.callParams['spender'].toString());
 
-  return ParsedResult(spender?.symbol, [
+  return ParsedResult(spender?.symbol ??'', [
     toChecksumAddress(callInfo.callParams['spender'].toString()),
-    token.symbol,
-    amount / Decimal.parse('1e' + decimal)
+    token?.symbol,
+    (amount / Decimal.parse('1e' + decimal)).toDecimal().toString()
   ]);
 }
 
@@ -202,11 +209,11 @@ void main() async {
         int.parse('28f61', radix: 16),
         int.parse('4190ab000', radix: 16),
         int.parse('9', radix: 16),
-        input: hex.decode("1249c58b"));
+        input: Uint8List.fromList(hex.decode("1249c58b")));
 
     final contract = tx.getContractInfo();
     final callInfo =
-        ContractCall.fromJson({'function': contract['method'], 'params': contract['params']});
+        ContractCall.fromJson({'function': contract?['method'], 'params': contract?['params']});
 
     final parsed = await parseMint(callInfo, tx);
 
@@ -225,11 +232,11 @@ void main() async {
         int.parse('4b4038a00', radix: 16),
         int.parse('1c', radix: 16),
         input:
-            hex.decode("a0712d6800000000000000000000000000000000000000000000000000000001637c00ca"));
+            Uint8List.fromList(hex.decode("a0712d6800000000000000000000000000000000000000000000000000000001637c00ca")));
 
     final contract = tx.getContractInfo();
     final callInfo =
-        ContractCall.fromJson({'function': contract['method'], 'params': contract['params']});
+        ContractCall.fromJson({'function': contract?['method'], 'params': contract?['params']});
 
     final parsed = await parseMint(callInfo, tx);
 
@@ -248,11 +255,11 @@ void main() async {
         int.parse('131794b400', radix: 16),
         int.parse('70', radix: 16),
         input:
-            hex.decode("a0712d680000000000000000000000000000000000000000000000012631eb45d8e624ab"));
+            Uint8List.fromList(hex.decode("a0712d680000000000000000000000000000000000000000000000012631eb45d8e624ab")));
 
     final contract = tx.getContractInfo();
     final callInfo =
-        ContractCall.fromJson({'function': contract['method'], 'params': contract['params']});
+        ContractCall.fromJson({'function': contract?['method'], 'params': contract?['params']});
 
     final parsed = await parseMint(callInfo, tx);
 
@@ -271,11 +278,11 @@ void main() async {
         int.parse('35458af00', radix: 16),
         int.parse('60', radix: 16),
         input:
-            hex.decode("c5ebeaec00000000000000000000000000000000000000000000000000b1a2bc2ec50000"));
+            Uint8List.fromList(hex.decode("c5ebeaec00000000000000000000000000000000000000000000000000b1a2bc2ec50000")));
 
     final contract = tx.getContractInfo();
     final callInfo =
-        ContractCall.fromJson({'function': contract['method'], 'params': contract['params']});
+        ContractCall.fromJson({'function': contract?['method'], 'params': contract?['params']});
 
     final parsed = await parseBorrow(callInfo, tx);
 
@@ -294,11 +301,11 @@ void main() async {
         int.parse('4a817c800', radix: 16),
         int.parse('153', radix: 16),
         input:
-            hex.decode("c5ebeaec000000000000000000000000000000000000000000000000000000012a05f200"));
+            Uint8List.fromList(hex.decode("c5ebeaec000000000000000000000000000000000000000000000000000000012a05f200")));
 
     final contract = tx.getContractInfo();
     final callInfo =
-        ContractCall.fromJson({'function': contract['method'], 'params': contract['params']});
+        ContractCall.fromJson({'function': contract?['method'], 'params': contract?['params']});
 
     final parsed = await parseBorrow(callInfo, tx);
 
@@ -316,11 +323,11 @@ void main() async {
         int.parse('2511d', radix: 16),
         int.parse('342770c00', radix: 16),
         int.parse('1a', radix: 16),
-        input: hex.decode("4e4d9fea"));
+        input: Uint8List.fromList(hex.decode("4e4d9fea")));
 
     final contract = tx.getContractInfo();
     final callInfo =
-        ContractCall.fromJson({'function': contract['method'], 'params': contract['params']});
+        ContractCall.fromJson({'function': contract?['method'], 'params': contract?['params']});
 
     final parsed = await parseRepayBorrow(callInfo, tx);
 
@@ -339,11 +346,11 @@ void main() async {
         int.parse('4fbc54646', radix: 16),
         int.parse('126', radix: 16),
         input:
-            hex.decode("0e75270200000000000000000000000000000000000000000000000000000000e12f28ab"));
+            Uint8List.fromList(hex.decode("0e75270200000000000000000000000000000000000000000000000000000000e12f28ab")));
 
     final contract = tx.getContractInfo();
     final callInfo =
-        ContractCall.fromJson({'function': contract['method'], 'params': contract['params']});
+        ContractCall.fromJson({'function': contract?['method'], 'params': contract?['params']});
 
     final parsed = await parseRepayBorrow(callInfo, tx);
 
@@ -362,11 +369,11 @@ void main() async {
         int.parse('4fbc54646', radix: 16),
         int.parse('126', radix: 16),
         input:
-            hex.decode("0e752702ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"));
+            Uint8List.fromList(hex.decode("0e752702ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")));
 
     final contract = tx.getContractInfo();
     final callInfo =
-        ContractCall.fromJson({'function': contract['method'], 'params': contract['params']});
+        ContractCall.fromJson({'function': contract?['method'], 'params': contract?['params']});
 
     final parsed = await parseRepayBorrow(callInfo, tx);
 
@@ -385,11 +392,11 @@ void main() async {
         int.parse('41314cf00', radix: 16),
         int.parse('b8', radix: 16),
         input:
-            hex.decode("db006a75000000000000000000000000000000000000000000000000000000a02a0d4814"));
+            Uint8List.fromList(hex.decode("db006a75000000000000000000000000000000000000000000000000000000a02a0d4814")));
 
     final contract = tx.getContractInfo();
     final callInfo =
-        ContractCall.fromJson({'function': contract['method'], 'params': contract['params']});
+        ContractCall.fromJson({'function': contract?['method'], 'params': contract?['params']});
 
     final parsed = await parseRedeem(callInfo, tx);
 
@@ -407,11 +414,11 @@ void main() async {
         int.parse('342770c00', radix: 16),
         int.parse('225', radix: 16),
         input:
-            hex.decode("db006a75000000000000000000000000000000000000000000000000000000001dbc088a"));
+            Uint8List.fromList(hex.decode("db006a75000000000000000000000000000000000000000000000000000000001dbc088a")));
 
     final contract = tx.getContractInfo();
     final callInfo =
-        ContractCall.fromJson({'function': contract['method'], 'params': contract['params']});
+        ContractCall.fromJson({'function': contract?['method'], 'params': contract?['params']});
 
     final parsed = await parseRedeem(callInfo, tx);
 
@@ -429,11 +436,11 @@ void main() async {
         int.parse('737be7600', radix: 16),
         int.parse('8', radix: 16),
         input:
-            hex.decode("db006a750000000000000000000000000000000000000000000000000000025722ceece0"));
+            Uint8List.fromList(hex.decode("db006a750000000000000000000000000000000000000000000000000000025722ceece0")));
 
     final contract = tx.getContractInfo();
     final callInfo =
-        ContractCall.fromJson({'function': contract['method'], 'params': contract['params']});
+        ContractCall.fromJson({'function': contract?['method'], 'params': contract?['params']});
 
     final parsed = await parseRedeem(callInfo, tx);
 
@@ -451,11 +458,11 @@ void main() async {
         int.parse('2cb417800', radix: 16),
         int.parse('34', radix: 16),
         input:
-            hex.decode("852a12e30000000000000000000000000000000000000000000000001904506451e633ed"));
+            Uint8List.fromList(hex.decode("852a12e30000000000000000000000000000000000000000000000001904506451e633ed")));
 
     final contract = tx.getContractInfo();
     final callInfo =
-        ContractCall.fromJson({'function': contract['method'], 'params': contract['params']});
+        ContractCall.fromJson({'function': contract?['method'], 'params': contract?['params']});
 
     final parsed = await parseRedeemUnderlying(callInfo, tx);
 
@@ -474,11 +481,11 @@ void main() async {
         int.parse('3b9aca000', radix: 16),
         int.parse('8', radix: 16),
         input:
-            hex.decode("852a12e30000000000000000000000000000000000000000000000000000000053724e00"));
+            Uint8List.fromList(hex.decode("852a12e30000000000000000000000000000000000000000000000000000000053724e00")));
 
     final contract = tx.getContractInfo();
     final callInfo =
-        ContractCall.fromJson({'function': contract['method'], 'params': contract['params']});
+        ContractCall.fromJson({'function': contract?['method'], 'params': contract?['params']});
 
     final parsed = await parseRedeemUnderlying(callInfo, tx);
 
@@ -496,12 +503,12 @@ void main() async {
         int.parse('37051', radix: 16),
         int.parse('312c80400', radix: 16),
         int.parse('1a', radix: 16),
-        input: hex.decode(
-            "a9059cbb0000000000000000000000006094f978eeba9b7ff2f9713efdec1d252ca6ed1a0000000000000000000000000000000000000000000000000000008d0ff2579d"));
+        input: Uint8List.fromList(hex.decode(
+            "a9059cbb0000000000000000000000006094f978eeba9b7ff2f9713efdec1d252ca6ed1a0000000000000000000000000000000000000000000000000000008d0ff2579d")));
 
     final contract = tx.getContractInfo();
     final callInfo =
-        ContractCall.fromJson({'function': contract['method'], 'params': contract['params']});
+        ContractCall.fromJson({'function': contract?['method'], 'params': contract?['params']});
 
     final parsed = await parseTransfer(callInfo, tx);
 
@@ -519,12 +526,12 @@ void main() async {
         int.parse('b548', radix: 16),
         int.parse('45a9b5b00', radix: 16),
         int.parse('a2', radix: 16),
-        input: hex.decode(
-            "095ea7b3000000000000000000000000e66b31678d6c16e9ebf358268a790b763c133750ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"));
+        input: Uint8List.fromList(hex.decode(
+            "095ea7b3000000000000000000000000e66b31678d6c16e9ebf358268a790b763c133750ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")));
 
     final contract = tx.getContractInfo();
     final callInfo =
-        ContractCall.fromJson({'function': contract['method'], 'params': contract['params']});
+        ContractCall.fromJson({'function': contract?['method'], 'params': contract?['params']});
 
     final parsed = await parseApprove(callInfo, tx);
 
@@ -543,12 +550,12 @@ void main() async {
         int.parse('b548', radix: 16),
         int.parse('45a9b5b00', radix: 16),
         int.parse('a2', radix: 16),
-        input: hex.decode(
-            "095ea7b30000000000000000000000007a250d5630B4cF539739dF2C5dAcb4c659F2488Dffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"));
+        input: Uint8List.fromList(hex.decode(
+            "095ea7b30000000000000000000000007a250d5630B4cF539739dF2C5dAcb4c659F2488Dffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")));
 
     final contract = tx.getContractInfo();
     final callInfo =
-        ContractCall.fromJson({'function': contract['method'], 'params': contract['params']});
+        ContractCall.fromJson({'function': contract?['method'], 'params': contract?['params']});
 
     final parsed = await parseApprove(callInfo, tx);
 
@@ -568,12 +575,12 @@ void main() async {
         int.parse('1dca4', radix: 16),
         int.parse('36c31cd28', radix: 16),
         int.parse('a2', radix: 16),
-        input: hex.decode(
-            "c2998238000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000010000000000000000000000004ddc2d193948926d02f9b1fe9e1daa0718270ed5"));
+        input: Uint8List.fromList(hex.decode(
+            "c2998238000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000010000000000000000000000004ddc2d193948926d02f9b1fe9e1daa0718270ed5")));
 
     final contract = tx.getContractInfo();
     final callInfo =
-        ContractCall.fromJson({'function': contract['method'], 'params': contract['params']});
+        ContractCall.fromJson({'function': contract?['method'], 'params': contract?['params']});
 
     final parsed = await parseEnterMarkets(callInfo, tx);
 
@@ -592,11 +599,11 @@ void main() async {
         int.parse('91494c600', radix: 16),
         int.parse('546', radix: 16),
         input:
-            hex.decode("e9af02920000000000000000000000009da6ca884f24dc29b320cc9075d769909a55a544"));
+            Uint8List.fromList(hex.decode("e9af02920000000000000000000000009da6ca884f24dc29b320cc9075d769909a55a544")));
 
     final contract = tx.getContractInfo();
     final callInfo =
-        ContractCall.fromJson({'function': contract['method'], 'params': contract['params']});
+        ContractCall.fromJson({'function': contract?['method'], 'params': contract?['params']});
 
     final parsed = await parseClaimComp(callInfo, tx);
 
@@ -614,11 +621,11 @@ void main() async {
         int.parse('826299e00', radix: 16),
         int.parse('5', radix: 16),
         input:
-            hex.decode("ede4edd00000000000000000000000005d3a536e4d6dbd6114cc1ead35777bab948e3643"));
+            Uint8List.fromList(hex.decode("ede4edd00000000000000000000000005d3a536e4d6dbd6114cc1ead35777bab948e3643")));
 
     final contract = tx.getContractInfo();
     final callInfo =
-        ContractCall.fromJson({'function': contract['method'], 'params': contract['params']});
+        ContractCall.fromJson({'function': contract?['method'], 'params': contract?['params']});
 
     final parsed = await parseExitMarket(callInfo, tx);
 

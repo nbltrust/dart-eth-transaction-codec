@@ -1,0 +1,338 @@
+[
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "addr",
+        "type": "address"
+      }
+    ],
+    "name": "endGrantAuthentication",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "addr",
+        "type": "address"
+      }
+    ],
+    "name": "revokeAuthentication",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [],
+    "name": "renounceOwnership",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "addr",
+        "type": "address"
+      }
+    ],
+    "name": "startGrantAuthentication",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "authAddress",
+        "type": "address"
+      }
+    ],
+    "name": "grantInitialAuthentication",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "transferOwnership",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+	{
+    "constant": false,
+    "inputs": [
+      {
+        "name": "newMinimumMakerProtocolFee",
+        "type": "uint256"
+      }
+    ],
+    "name": "changeMinimumMakerProtocolFee",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "newMinimumTakerProtocolFee",
+        "type": "uint256"
+      }
+    ],
+    "name": "changeMinimumTakerProtocolFee",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [],
+    "name": "renounceOwnership",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+	{
+    "constant": false,
+    "inputs": [],
+    "name": "registerProxy",
+    "outputs": [
+      {
+        "name": "proxy",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "addrs",
+        "type": "address[7]"
+      },
+      {
+        "name": "uints",
+        "type": "uint256[9]"
+      },
+      {
+        "name": "feeMethod",
+        "type": "uint8"
+      },
+      {
+        "name": "side",
+        "type": "uint8"
+      },
+      {
+        "name": "saleKind",
+        "type": "uint8"
+      },
+      {
+        "name": "howToCall",
+        "type": "uint8"
+      },
+      {
+        "name": "calldata",
+        "type": "bytes"
+      },
+      {
+        "name": "replacementPattern",
+        "type": "bytes"
+      },
+      {
+        "name": "staticExtradata",
+        "type": "bytes"
+      },
+      {
+        "name": "orderbookInclusionDesired",
+        "type": "bool"
+      }
+    ],
+    "name": "approveOrder_",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "addrs",
+        "type": "address[7]"
+      },
+      {
+        "name": "uints",
+        "type": "uint256[9]"
+      },
+      {
+        "name": "feeMethod",
+        "type": "uint8"
+      },
+      {
+        "name": "side",
+        "type": "uint8"
+      },
+      {
+        "name": "saleKind",
+        "type": "uint8"
+      },
+      {
+        "name": "howToCall",
+        "type": "uint8"
+      },
+      {
+        "name": "calldata",
+        "type": "bytes"
+      },
+      {
+        "name": "replacementPattern",
+        "type": "bytes"
+      },
+      {
+        "name": "staticExtradata",
+        "type": "bytes"
+      },
+      {
+        "name": "v",
+        "type": "uint8"
+      },
+      {
+        "name": "r",
+        "type": "bytes32"
+      },
+      {
+        "name": "s",
+        "type": "bytes32"
+      }
+    ],
+    "name": "cancelOrder_",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "addrs",
+        "type": "address[14]"
+      },
+      {
+        "name": "uints",
+        "type": "uint256[18]"
+      },
+      {
+        "name": "feeMethodsSidesKindsHowToCalls",
+        "type": "uint8[8]"
+      },
+      {
+        "name": "calldataBuy",
+        "type": "bytes"
+      },
+      {
+        "name": "calldataSell",
+        "type": "bytes"
+      },
+      {
+        "name": "replacementPatternBuy",
+        "type": "bytes"
+      },
+      {
+        "name": "replacementPatternSell",
+        "type": "bytes"
+      },
+      {
+        "name": "staticExtradataBuy",
+        "type": "bytes"
+      },
+      {
+        "name": "staticExtradataSell",
+        "type": "bytes"
+      },
+      {
+        "name": "vs",
+        "type": "uint8[2]"
+      },
+      {
+        "name": "rssMetadata",
+        "type": "bytes32[5]"
+      }
+    ],
+    "name": "atomicMatch_",
+    "outputs": [],
+    "payable": true,
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "transferOwnership",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "from",
+        "type": "address"
+      },
+      {
+        "name": "to",
+        "type": "address"
+      },
+      {
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "name": "value",
+        "type": "uint256"
+      },
+      {
+        "name": "data",
+        "type": "bytes"
+      }
+    ],
+    "name": "safeTransferFrom",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]

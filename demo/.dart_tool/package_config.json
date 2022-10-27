@@ -1,0 +1,104 @@
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "collection",
+      "rootUri": "file:///Users/zzw/.pub-cache/hosted/pub.flutter-io.cn/collection-1.17.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "convert",
+      "rootUri": "file:///Users/zzw/.pub-cache/hosted/pub.flutter-io.cn/convert-3.1.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.18"
+    },
+    {
+      "name": "dio",
+      "rootUri": "file:///Users/zzw/.pub-cache/hosted/pub.flutter-io.cn/dio-4.0.6",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "eth_abi_codec",
+      "rootUri": "file:///Users/zzw/.pub-cache/git/dart-eth-abi-codec-8e78f6fe6454cafc26e339f6b7da072ed1d2c1ed/",
+      "packageUri": "lib/",
+      "languageVersion": "2.17"
+    },
+    {
+      "name": "ethereum_codec",
+      "rootUri": "../../",
+      "packageUri": "lib/",
+      "languageVersion": "2.17"
+    },
+    {
+      "name": "http_parser",
+      "rootUri": "file:///Users/zzw/.pub-cache/hosted/pub.flutter-io.cn/http_parser-4.0.2",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "js",
+      "rootUri": "file:///Users/zzw/.pub-cache/hosted/pub.flutter-io.cn/js-0.6.5",
+      "packageUri": "lib/",
+      "languageVersion": "2.16"
+    },
+    {
+      "name": "meta",
+      "rootUri": "file:///Users/zzw/.pub-cache/hosted/pub.flutter-io.cn/meta-1.8.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "path",
+      "rootUri": "file:///Users/zzw/.pub-cache/hosted/pub.flutter-io.cn/path-1.8.2",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "pointycastle",
+      "rootUri": "file:///Users/zzw/.pub-cache/hosted/pub.flutter-io.cn/pointycastle-3.6.2",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "source_span",
+      "rootUri": "file:///Users/zzw/.pub-cache/hosted/pub.flutter-io.cn/source_span-1.9.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.14"
+    },
+    {
+      "name": "sprintf",
+      "rootUri": "file:///Users/zzw/.pub-cache/hosted/pub.flutter-io.cn/sprintf-7.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "string_scanner",
+      "rootUri": "file:///Users/zzw/.pub-cache/hosted/pub.flutter-io.cn/string_scanner-1.1.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "term_glyph",
+      "rootUri": "file:///Users/zzw/.pub-cache/hosted/pub.flutter-io.cn/term_glyph-1.2.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "typed_data",
+      "rootUri": "file:///Users/zzw/.pub-cache/hosted/pub.flutter-io.cn/typed_data-1.3.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "ethereum_codec_demo",
+      "rootUri": "../",
+      "packageUri": "lib/",
+      "languageVersion": "2.17"
+    }
+  ],
+  "generated": "2022-10-26T08:07:46.207560Z",
+  "generator": "pub",
+  "generatorVersion": "2.18.2"
+}

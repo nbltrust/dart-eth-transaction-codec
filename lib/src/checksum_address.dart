@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:convert/convert.dart';
+import 'package:pointycastle/api.dart';
 import 'package:pointycastle/digests/sha3.dart';
 
 import 'util/my_hexdecode.dart';
@@ -12,7 +13,7 @@ String toChecksumAddress(String hexAddress)
 {
     hexAddress = strip0x(hexAddress);
 
-    var digest = SHA3Digest(256, true).process(Uint8List.fromList(hexAddress.toLowerCase().codeUnits));
+    var digest = Digest('Keccak/256').process(Uint8List.fromList(hexAddress.toLowerCase().codeUnits));
     var hexStr = hex.encode(digest);
     var checksumAddr = '';
     for(var i = 0; i < hexAddress.length; i++) {
@@ -27,7 +28,7 @@ String toChecksumAddress(String hexAddress)
 
 String publicKeyToChecksumAddress(String hexX, String hexY) {
   var plainKey = my_hexdecode(hexX) + my_hexdecode(hexY);
-  var digest = SHA3Digest(256, true).process(Uint8List.fromList(plainKey));
+  var digest = Digest('Keccak/256').process(Uint8List.fromList(plainKey));
   var hexDigest = hex.encode(digest);
   return toChecksumAddress(hexDigest.substring(hexDigest.length - 40));
 }

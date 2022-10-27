@@ -56,45 +56,45 @@ void main() async {
   initAbi();
   ETHRpc.createInstance(callInfura);
   print('call ERC20 name');
-  print(await ETHRpc.instance().ethCall('0xdac17f958d2ee523a2206206994597c13d831ec7', 'name', {}));
+  print(await ETHRpc.instance()?.ethCall('0xdac17f958d2ee523a2206206994597c13d831ec7', 'name', {}));
 
   print('call ERC20 symbol');
-  print(await ETHRpc.instance().ethCall('0xdac17f958d2ee523a2206206994597c13d831ec7', 'symbol', {}));
+  print(await ETHRpc.instance()?.ethCall('0xdac17f958d2ee523a2206206994597c13d831ec7', 'symbol', {}));
 
   print('call ERC20 decimals');
-  print(await ETHRpc.instance().ethCall('0xdac17f958d2ee523a2206206994597c13d831ec7', 'decimals', {}));
+  print(await ETHRpc.instance()?.ethCall('0xdac17f958d2ee523a2206206994597c13d831ec7', 'decimals', {}));
 
   print('call unknown ERC20 name');
-  print(await ETHRpc.instance().ethCall('0xdf5e0e81dff6faf3a7e52ba697820c5e32d806a8', 'name', {}, type: 'ERC20'));
+  print(await ETHRpc.instance()?.ethCall('0xdf5e0e81dff6faf3a7e52ba697820c5e32d806a8', 'name', {}, type: 'ERC20'));
 
   print('call unknown ERC20 symbol');
-  print(await ETHRpc.instance().ethCall('0xdf5e0e81dff6faf3a7e52ba697820c5e32d806a8', 'symbol', {}, type: 'ERC20'));
+  print(await ETHRpc.instance()?.ethCall('0xdf5e0e81dff6faf3a7e52ba697820c5e32d806a8', 'symbol', {}, type: 'ERC20'));
   
   print('call unknown ERC20 decimals');
-  print(await ETHRpc.instance().ethCall('0xdf5e0e81dff6faf3a7e52ba697820c5e32d806a8', 'decimals', {}, type: 'ERC20'));
+  print(await ETHRpc.instance()?.ethCall('0xdf5e0e81dff6faf3a7e52ba697820c5e32d806a8', 'decimals', {}, type: 'ERC20'));
 
   print('call contract by unexist method name');
   try {
-    await ETHRpc.instance().ethCall('0x5ba5fcf1d81d4ce036bba16b36ba71577aa6ef89', 'name', {}, type: 'ERC20');
+    await ETHRpc.instance()?.ethCall('0x5ba5fcf1d81d4ce036bba16b36ba71577aa6ef89', 'name', {}, type: 'ERC20');
   } on Exception catch (e) {
     print("${e}");
   }
 
   print('aggregate call');
-  print(await ETHRpc.instance().aggregateCall([
+  print(await ETHRpc.instance()?.aggregateCall([
     ['0xdf5e0e81dff6faf3a7e52ba697820c5e32d806a8', 'name', Map<String, dynamic>(), 'ERC20'],
     ['0xdac17f958d2ee523a2206206994597c13d831ec7', 'symbol', Map<String, dynamic>()],
     ['0xdac17f958d2ee523a2206206994597c13d831ec7', 'decimals', Map<String, dynamic>()]
   ]));
 
   print('get ERC20 config');
-  print(await ETHRpc.instance().getERC20Config('0xdf5e0e81dff6faf3a7e52ba697820c5e32d806a8'));
+  print(await ETHRpc.instance()?.getERC20Config('0xdf5e0e81dff6faf3a7e52ba697820c5e32d806a8'));
 
   print('get Gas price');
-  print(await ETHRpc.instance().getGasPrice());
+  print(await ETHRpc.instance()?.getGasPrice());
 
   print('estimate gas');
-  print(await ETHRpc.instance().estimateGas(
+  print(await ETHRpc.instance()?.estimateGas(
       '0x5ba5fcf1d81d4ce036bba16b36ba71577aa6ef89',
       BigInt.zero,
       'approve',
@@ -102,7 +102,7 @@ void main() async {
       type: 'ERC20'));
 
   print('estimate gas raw');
-  print(await ETHRpc.instance().estimateGasRaw(
+  print(await ETHRpc.instance()?.estimateGasRaw(
       '0x9271d303b57c204636c38df0ed339b18bf98f909',
       '0x8e1bc9bf040000',
       '0xa4eba3830000000000000000000000000000000000000000000000008d8be6f53763a146000000000000000000000000000000000000000000000004c767dead6a855bb1000000000000000000000000f83310afadd9912cab1326c9710a919b8ff228f500000000000000000000000000000000000000000000000000000eb67310b3e0'));

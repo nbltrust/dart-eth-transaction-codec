@@ -3,7 +3,9 @@ library ethereum_codec.message;
 import 'dart:typed_data';
 
 import 'package:convert/convert.dart';
-import 'package:ethereum_util/ethereum_util.dart';
+import 'package:pointycastle/api.dart';
+import 'package:pointycastle/digests/keccak.dart';
+
 
 import 'util/strip0x.dart';
 
@@ -24,6 +26,6 @@ class EthereumMessage {
 
   Uint8List hashToSign() {
     final decoded = this.decoded;
-    return keccak("$MESSAGE_PREFIX${decoded.length.toString()}$decoded");
+    return Digest('Keccak/256').process(Uint8List.fromList(hex.decode("$MESSAGE_PREFIX${decoded.length.toString()}$decoded")));
   }
 }

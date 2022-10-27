@@ -5,8 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:ethereum_codec/ethereum_codec.dart';
 
 Future<dynamic> callInfura(String method, List<dynamic> args) async {
-  var dio = new Dio();
-  var response = await dio.post('https://geth:Ushu764Yshdl73jsd@eth-node-wookong.nbltrust.com',
+  var response = await Dio().post('https://mainnet.infura.io/v3/12a9161db1dd4fce8290ab19ea9128d5',
       data: {'id': 1, 'jsonrpc': '2.0', 'method': method, 'params': args});
   if (response.data.containsKey('error')) {
     throw Exception(response.data['error']);
@@ -30,7 +29,7 @@ void initAbi() {
 
   final rinkebyConfig = jsonDecode(File('../demo/contract_abi/evm_symbols/rinkeby.json').readAsStringSync());
   symbols = jsonDecode(symbolFile.readAsStringSync())['contracts'];
-  AddressConfig.instance.append(rinkebyConfig['contracts'], rinkebyConfig['chainId']);
+  AddressConfig.instance?.append(rinkebyConfig['contracts'], rinkebyConfig['chainId']);
 
   ETHRpc.createInstance(callInfura);
 }

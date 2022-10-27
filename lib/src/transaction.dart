@@ -5,9 +5,10 @@ import 'dart:typed_data';
 import 'package:convert/convert.dart';
 import 'package:eth_abi_codec/eth_abi_codec.dart';
 import 'package:ethereum_codec/src/translator.dart';
+import 'package:pointycastle/api.dart';
 import 'package:pointycastle/src/utils.dart' as pointy;
 import 'package:pointycastle/digests/sha3.dart';
-import 'package:ethereum_util/src/rlp.dart' as eth_rlp;
+import 'util/rlp.dart' as eth_rlp;
 import './checksum_address.dart' as cks_addr;
 import './contracts.dart';
 import 'util/strip0x.dart';
@@ -41,7 +42,7 @@ class EthereumTransactionId {
 
   /// Computes the hash of [transaction] - not implemented.
   EthereumTransactionId.compute(Uint8List rlpEncodedTransaction)
-      : data = SHA3Digest(256, true).process(rlpEncodedTransaction);
+      : data = Digest('Keccak/256').process(rlpEncodedTransaction);
 
   /// Marshals [EthereumTransactionId] as a hex string.
   @override
@@ -52,17 +53,17 @@ class EthereumTransactionId {
 
 class EthereumTransaction {
   /// Address of the sender.
-  EthereumAddressHash from;
+  EthereumAddressHash? from;
   /// Address of the receiver. null when its a contract creation transaction.
   EthereumAddressHash to;
   BigInt value;
   int gas;
   int gasPrice;
   int nonce;
-  Uint8List input;
-  int sigV;
-  Uint8List sigR;
-  Uint8List sigS;
+  Uint8List? input;
+  int? sigV;
+  Uint8List? sigR;
+  Uint8List? sigS;
   int chainId;
 
   EthereumTransaction(
@@ -125,7 +126,7 @@ class EthereumTransaction {
   }
 
   Uint8List hashToSign() {
-    return SHA3Digest(256, true).process(
+    return Digest('Keccak/256').process(
       eth_rlp.encode(<dynamic>[nonce, gasPrice, gas, to.data, value, input, chainId, Uint8List(0), Uint8List(0)])
     );
   }
@@ -146,19 +147,28 @@ class EthereumTransaction {
   /// ```
   /// if transaction does not contain a contract call, return {}
   /// if contract call target address can not be recognized, return null
-  Map<String, dynamic> getContractInfo() {
+  Map<String, dynamic>? getContractInfo() {
     var contractCfg = getContractConfigByAddress(to.toString());
 
     if(contractCfg == null) {
-      if(input.length == 0) {
+      if(input != null && input!.length == 0) {
         return {};
       } else {
         return null;
       }
     }
-  
+
     var abi = getContractABIByType(contractCfg.type);
-    var call_info = ContractCall.fromBinary(input, abi);
+    if(abi == null || input == null){
+      return {
+        'symbol': contractCfg.symbol,
+        'type': contractCfg.type,
+        'contract_params': contractCfg.params,
+        'method': "",
+        'params': ""
+      };
+    }
+    var call_info = ContractCall.fromBinary(input!, abi);
     return {
       'symbol': contractCfg.symbol,
       'type': contractCfg.type,
@@ -168,7 +178,7 @@ class EthereumTransaction {
     };
   }
 
-  Future<String> getDescription() async {
+  Future<String?> getDescription() async {
     return await Translator.translate(this);
   }
 }
