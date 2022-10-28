@@ -31,7 +31,7 @@ Future<ParsedResult> parseAddLiquidityETH(ContractCall callInfo, dynamic tx) asy
 
   final args = [
     ['≥', (amountMin / Decimal.parse('1e' + token.params?['decimal'])).toDecimal().toString(), token.symbol],
-    ['≤', valueDecimal / Decimal.parse('1e18'), 'ETH'],
+    ['≤', (valueDecimal / Decimal.parse('1e18')).toDecimal().toString(), 'ETH'],
   ];
 
   return ParsedResult(recipient, ['addLiquidity', args[0], args[1]]);
@@ -53,7 +53,7 @@ Future<ParsedResult> parseRemoveLiquidityETH(ContractCall callInfo, dynamic tx) 
 
   final args = [
     ['≥', (amountMin / Decimal.parse('1e' + token.params?['decimal'])).toDecimal().toString(), token.symbol],
-    ['≥', valueDecimal / Decimal.parse('1e18'), 'ETH'],
+    ['≥', (valueDecimal / Decimal.parse('1e18')).toDecimal().toString(), 'ETH'],
   ];
 
   return ParsedResult(recipient, ['removeLiquidity', args[0], args[1]]);
@@ -91,7 +91,6 @@ Future<ParsedResult> parseRemoveLiquidity(ContractCall callInfo, dynamic tx) asy
   final token1Addr = params['tokenB'].toString();
   final token0 = getContractConfigByAddress(token0Addr);
   final token1 = getContractConfigByAddress(token1Addr);
-
   if (token0 == null || token1 == null) {
     return ParsedResult(recipient, []);
   }
@@ -149,9 +148,7 @@ void main() async {
 
     final contract = tx.getContractInfo();
     final callInfo = ContractCall.fromJson({'function': contract?['method'], 'params': contract?['params']});
-    print("---------------------- $contract");
     final parsed = await parseAddLiquidityETH(callInfo, tx);
-    print("---------------------- ${parsed.recipient} ${parsed.args} ${tx.from.toString()}");
     expect(parsed.recipient, tx.from.toString());
 
     final s = sprintf("Add Liquidity %s and %s", extractArgs(parsed.args));

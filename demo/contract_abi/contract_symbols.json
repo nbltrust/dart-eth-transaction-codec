@@ -1540,6 +1540,51 @@
       }
     },
     {
+      "address": "0x2e9d63788249371f1DFC918a52f8d799F4a38C94",
+      "symbol": "TOKE",
+      "name": "Tokemak",
+      "type": "TOKE",
+      "params": {
+        "decimal": "18"
+      }
+    },
+    {
+      "address": "0xF88b137cfa667065955ABD17525e89EDCF4D6426",
+      "symbol": "ITG",
+      "name": "iTrust Governance Token",
+      "type": "ITG",
+      "params": {
+        "decimal": "18"
+      }
+    },
+    {
+      "address": "0xC7a8B45E184138114E6085C82936A8Db93DD156a",
+      "symbol": "MASK",
+      "name": "Hashmasks",
+      "type": "MASK",
+      "params": {
+        "decimal": "18"
+      }
+    },
+    {
+      "address": "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+      "symbol": "WBTC",
+      "name": "Wrapped BTC",
+      "type": "WBTC",
+      "params": {
+        "decimal": "8"
+      }
+    },
+    {
+      "address": "0x3472A5A71965499acd81997a54BBA8D852C6E53d",
+      "symbol": "BADGER",
+      "name": "Token Badger",
+      "type": "BADGER",
+      "params": {
+        "decimal": "18"
+      }
+    },
+    {
       "address": "0x7AFeBBB46fDb47ed17b22ed075Cde2447694fB9e",
       "symbol": "OCEAN",
       "name": "Ocean Token",
