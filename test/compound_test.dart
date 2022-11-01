@@ -167,8 +167,7 @@ Future<ParsedResult> parseApprove(ContractCall callInfo, dynamic tx) async {
   final decimal = token?.params?['decimal'].toString() ??'';
 
   final spender = getContractConfigByAddress(callInfo.callParams['spender'].toString());
-
-  return ParsedResult(spender?.symbol ??'', [
+  return ParsedResult(spender?.symbol, [
     toChecksumAddress(callInfo.callParams['spender'].toString()),
     token?.symbol,
     (amount / Decimal.parse('1e' + decimal)).toDecimal().toString()
@@ -563,7 +562,7 @@ void main() async {
         ? sprintf("ERC20 approve unknown contract %s", parsed.args)
         : sprintf("Approve %s to use %s", [parsed.recipient, parsed.args[1]]);
     print(s);
-    expect(s, "Approve UNISWAP to use cZRX");
+    expect(s, "Approve Uniswap V2 to use cZRX");
   });
 
   // 0x955c281b5b59db32963d2547fe37d0ea519cfee89fbafdd25f054aa211c4a597

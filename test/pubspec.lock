@@ -89,8 +89,8 @@ packages:
     dependency: transitive
     description:
       path: "."
-      ref: "2.0.1"
-      resolved-ref: a7cc81779d4a56d245e748971f079c2b7a784205
+      ref: "2.0.0"
+      resolved-ref: "53e45a9ae5fa780a10e46e4abf14bb8a4f3ff232"
       url: "https://github.com/nbltrust/dart-eth-abi-codec.git"
     source: git
     version: "2.0.0"

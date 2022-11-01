@@ -75,7 +75,7 @@
     },
     {
       "name": "eth_abi_codec",
-      "rootUri": "file:///Users/zzw/.pub-cache/git/dart-eth-abi-codec-a7cc81779d4a56d245e748971f079c2b7a784205/",
+      "rootUri": "file:///Users/zzw/.pub-cache/git/dart-eth-abi-codec-53e45a9ae5fa780a10e46e4abf14bb8a4f3ff232/",
       "packageUri": "lib/",
       "languageVersion": "2.17"
     },
@@ -332,7 +332,7 @@
       "languageVersion": "2.17"
     }
   ],
-  "generated": "2022-10-28T06:52:42.734313Z",
+  "generated": "2022-11-01T07:26:48.612221Z",
   "generator": "pub",
   "generatorVersion": "2.18.2"
 }
